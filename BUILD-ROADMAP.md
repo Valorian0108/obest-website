@@ -12,7 +12,7 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 - **Prototype built:** static, dependency-free pages for Home, category-first Catalogue, product details, Request an item, About & Visit, Privacy, and a Guides hub with a locally drafted charging-accessory checklist awaiting owner review.
 - **Catalogue:** batch 1 (20 products) and batch 2 (8 products) are owner-approved. Product images are local assets. Taller photos now have more display space so packaging details are easier to read.
-- **Homepage photography:** the hero now uses the first three owner-supplied product images (mouse, cable and USB drives), centered without an added card or labels and spaced above the yellow band. The earlier illustrative phone-and-earbuds photo remains unused in the assets folder. Confirm image-use permission and final composition before launch.
+- **Homepage photography:** the hero rotates through selected owner-supplied accessory/product photos, centered without an added card or labels and spaced above the yellow band. Confirm image-use permission and final composition before launch.
 - **Custom category illustrations:** original local SVG object illustrations were added to the existing homepage category strip and category cards; artwork and placement remain open for owner/design review.
 - **Sourcing timing:** the owner confirmed that items not available in-store can be sourced within 24 hours after a customer request. Copy describes sourcing time only and does not promise delivery.
 - **Product policy:** prices remain blank, availability says “Ask us to check,” and unsupported claims should be removed rather than guessed.
@@ -166,11 +166,18 @@ Use this queue to keep the review findings in scope and in a safe order. A task 
 
 ### 0.2 Homepage photography carousel — implemented locally; owner review pending
 
-- Replaced the existing illustrative hero photo with the first three selected replacement assets: RGB mouse, multi-connector cable, and colourful USB drives. The initially rejected Oraimo collage is not used.
-- Added the images to `assets/homepage/` under descriptive names; originals remain preserved in `incoming/`. All three source assets are square; the hero uses one fixed square frame and `object-fit: contain`, so no source image is stretched or cropped. The transparent frame surround lets the hero's circular linework carry through behind the photo, with a slightly stronger light outline and yellow base accent rather than a floating white card; image name/count labels have been removed.
+- Replaced the existing illustrative hero photo with owner-supplied images. The selected set includes the RGB mouse, multi-connector cable, colourful USB drives, portable and feature-phone products, charging and data accessories, screen protectors, a keyboard/mouse and earbuds. Mixed Oraimo/shop displays, repair imagery and compatibility charts are not used in the hero.
+- Added the selected images to `assets/homepage/` under descriptive names; originals remain preserved in `incoming/`. The hero uses one fixed square frame and `object-fit: contain`, so source images are not stretched or cropped. The transparent frame surround lets the hero's circular linework carry through behind the photo, with a slightly stronger light outline and yellow base accent rather than a floating white card; image name/count labels have been removed.
 - Images are centered in the blue hero area with a deliberate gap above the yellow band. They rotate automatically every seven seconds with a slower 1.5-second crossfade. No carousel pause control is shown; the carousel stops when off-screen or the tab is hidden and stays static for reduced-motion preference. Images decode before rotation begins.
 - Mobile rendering checked at 320, 375, 414, and 760 CSS-pixel widths, plus the 768px desktop breakpoint. Kept the inner photo opening square, carried the circular hero linework behind the frame, verified image loading and the gap above the yellow band, and tuned the smallest-phone header and headline to avoid overflow and awkward wrapping.
 - **Remaining:** review the local photo/background integration with the owner. No deployment or Production change.
+
+### 0.3 Additional supplied imagery — sorted locally; owner verification pending
+
+- Visually reviewed all 24 uploaded JPEGs and compared them with the existing named product assets using SHA-256 hashes. Three are exact duplicates of the already organized homepage mouse, cable, and USB-drive images; the originals remain in `incoming/` without creating redundant copies.
+- Organized 11 distinct product/accessory photos in the homepage carousel assets. The photos remain uncropped and use neutral, visually grounded alt text; the original seven-second timing, crossfade, frame, and reduced-motion behavior apply consistently to all slides.
+- Sorted 10 compatibility charts, repair/lifestyle images, and mixed shop displays under `assets/reference/`; these are not individual product photos and are not shown in the carousel.
+- Preserved all source images in `incoming/`. The new photos have not been added as catalogue records in `products.js`. Some model identities are unclear; confirm product details and image-use permission with the owner before cataloguing or launch.
 
 ### 1. Make item-request delivery genuinely operational — launch blocker
 
