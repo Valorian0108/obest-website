@@ -16,7 +16,7 @@ test("catalogue product IDs are unique and referenced images exist", () => {
   assert.deepEqual(missingImages.map(product => product.image), []);
 });
 
-test("deployment excludes local installers and the private domain order document", () => {
+test("deployment excludes local installers, private order document and uploaded originals", () => {
   const exclusions = ["assets/products/Claude Setup.exe", "assets/products/Cline_0.0.40_x64-setup.exe", "assets/products/namecheap-order-215626255.pdf"];
   const vercelIgnore = fs.readFileSync(path.resolve(__dirname, "..", ".vercelignore"), "utf8");
   const gitIgnore = fs.readFileSync(path.resolve(__dirname, "..", ".gitignore"), "utf8");
@@ -24,6 +24,8 @@ test("deployment excludes local installers and the private domain order document
     assert.ok(vercelIgnore.split(/\r?\n/).includes(file), `${file} must be excluded from Vercel deployment`);
     assert.ok(gitIgnore.split(/\r?\n/).includes(file), `${file} must be excluded from Git`);
   }
+  assert.ok(vercelIgnore.split(/\r?\n/).includes("/incoming/"), "uploaded originals must be excluded from Vercel deployment");
+  assert.ok(fs.existsSync(path.resolve(__dirname, "..", "incoming")), "uploaded originals must remain in the repository");
 });
 
 test("power-flex catalogue entries are model-specific, unique and exclude Samsung", () => {
