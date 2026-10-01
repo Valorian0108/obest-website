@@ -16,6 +16,13 @@ test("catalogue product IDs are unique and referenced images exist", () => {
   assert.deepEqual(missingImages.map(product => product.image), []);
 });
 
+test("nested catalogue groups are not hidden by the section reveal animation", () => {
+  const styles = fs.readFileSync(path.resolve(__dirname, "..", "styles.css"), "utf8");
+  assert.match(styles, /\.motion-ready main>section:not\(\.hero\)\{/);
+  assert.match(styles, /\.motion-ready main>section:not\(\.hero\)\.is-revealed\{/);
+  assert.doesNotMatch(styles, /\.motion-ready main section:not\(\.hero\)/);
+});
+
 test("deployment excludes local installers, private order document and uploaded originals", () => {
   const exclusions = ["assets/products/Claude Setup.exe", "assets/products/Cline_0.0.40_x64-setup.exe", "assets/products/namecheap-order-215626255.pdf"];
   const vercelIgnore = fs.readFileSync(path.resolve(__dirname, "..", ".vercelignore"), "utf8");
