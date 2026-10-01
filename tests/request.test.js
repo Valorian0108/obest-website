@@ -1,6 +1,52 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
 const { createHandler } = require("../api/request.js");
+
+const productsContext = {};
+vm.runInNewContext(fs.readFileSync(require.resolve("../products.js"), "utf8").replace("window.OBEST_PRODUCTS =", "globalThis.OBEST_PRODUCTS ="), productsContext);
+const products = Array.from(productsContext.OBEST_PRODUCTS);
+
+test("catalogue product IDs are unique and referenced images exist", () => {
+  const ids = products.map(product => product.id);
+  assert.equal(new Set(ids).size, ids.length, "product IDs must be unique");
+  const missingImages = products.filter(product => product.image && !fs.existsSync(path.resolve(__dirname, "..", product.image)));
+  assert.deepEqual(missingImages.map(product => product.image), []);
+});
+
+test("deployment excludes local installers and the private domain order document", () => {
+  const exclusions = ["assets/products/Claude Setup.exe", "assets/products/Cline_0.0.40_x64-setup.exe", "assets/products/namecheap-order-215626255.pdf"];
+  const vercelIgnore = fs.readFileSync(path.resolve(__dirname, "..", ".vercelignore"), "utf8");
+  const gitIgnore = fs.readFileSync(path.resolve(__dirname, "..", ".gitignore"), "utf8");
+  for (const file of exclusions) {
+    assert.ok(vercelIgnore.split(/\r?\n/).includes(file), `${file} must be excluded from Vercel deployment`);
+    assert.ok(gitIgnore.split(/\r?\n/).includes(file), `${file} must be excluded from Git`);
+  }
+});
+
+test("power-flex catalogue entries are model-specific, unique and exclude Samsung", () => {
+  const flexes = products.filter(product => product.itemType === "power-flex");
+  assert.ok(flexes.length > 0, "expected verified power/volume flex entries");
+  assert.equal(new Set(flexes.map(product => product.id)).size, flexes.length, "power-flex IDs must be unique");
+  assert.ok(flexes.every(product => product.brand !== "Samsung"), "Samsung flexes are excluded from this audit");
+  assert.ok(flexes.every(product => product.model && /flex|cable/i.test(product.description)), "every flex entry must name its handset and describe the flex or cable");
+  assert.ok(!flexes.some(product => product.id.includes("pouvoir-2")), "a volume-only source must not be presented as a confirmed power/volume flex");
+});
+
+test("power-flex supplier photos are local and linked to their exact supplier listing", () => {
+  const flexesWithPhotos = products.filter(product => product.itemType === "power-flex" && product.image);
+  assert.equal(flexesWithPhotos.length, 14, "only supplier photos tied to exact handset variants are added");
+  for (const product of flexesWithPhotos) {
+    assert.ok(product.photoSource?.startsWith("https://phonexperts.ng/product/"), `${product.id} needs its supplier source URL`);
+    assert.ok(fs.existsSync(path.resolve(__dirname, "..", product.image)), `${product.id} image must exist locally`);
+  }
+  for (const id of ["tecno-camon-20-pro-power-flex", "tecno-pop-5-pro-power-flex", "tecno-pop-6-go-power-flex", "iphone-14-pro-max-power-flex"]) {
+    const product = flexesWithPhotos.find(item => item.id === id);
+    assert.ok(product?.imageAlt, `${id} needs an alt label identifying the supplier reference photo`);
+  }
+});
 
 const ENV = {
   INQUIRY_ENABLED: "true",

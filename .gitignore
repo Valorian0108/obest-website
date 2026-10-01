@@ -3,5 +3,8 @@ node_modules
 .env
 .env.*
 !.env.example
+assets/products/Claude Setup.exe
+assets/products/Cline_0.0.40_x64-setup.exe
+assets/products/namecheap-order-215626255.pdf
 
 .vercel

@@ -1,6 +1,6 @@
 (() => {
-  const categoryNames = { power: "Power & charging", audio: "Audio", protection: "Phone protection", parts: "Phone parts" };
-  const itemTypeNames = { "power-banks": "Power banks", chargers: "Chargers", cables: "Cables", earbuds: "Earbuds", headphones: "Headphones" };
+  const categoryNames = { power: "Power & charging", audio: "Audio", protection: "Phone protection", parts: "Phone parts", computing: "Computing", wearables: "Wearables", home: "Home & appliances" };
+  const itemTypeNames = { "power-banks": "Power banks", chargers: "Chargers", cables: "Cables", earbuds: "Earbuds", headphones: "Headphones", mice: "Mice", smartwatches: "Smartwatches", fans: "Fans", cookers: "Cookers", "vacuum-cleaners": "Vacuum cleaners", "phone-screens": "Phone screens", "power-flex": "Power/volume flexes" };
   const iconMarkup = (type) => {
     const icons = {
       cable: '<path d="M31 9v8a8 8 0 0 0 16 0V9M35 9V5h8v4M19 33v6a8 8 0 0 0 16 0v-2"/><path d="M15 27h8v9h-8zM43 5h12v8H43z"/>',
@@ -18,11 +18,16 @@
       battery: '<rect x="16" y="17" width="36" height="34" rx="5"/><path d="M27 12h14v5M37 22 27 35h8l-4 11 12-16h-8z"/>',
       board: '<rect x="14" y="13" width="40" height="40" rx="5"/><path d="M22 21h13v10H22zM40 21h7M40 27h7M22 38h24M22 44h12"/><circle cx="44" cy="43" r="3"/>',
       flex: '<path d="M17 18h11q9 0 9 9v8q0 9 9 9h9M17 18v-6M55 44v8M17 18v19q0 9 9 9h5"/><circle cx="17" cy="12" r="3"/><circle cx="55" cy="52" r="3"/>',
-      port: '<path d="M17 27h34v14H17zM24 27v-8h20v8M27 41v9M41 41v9M28 34h2M38 34h2"/>'
+      port: '<path d="M17 27h34v14H17zM24 27v-8h20v8M27 41v9M41 41v9M28 34h2M38 34h2"/>',
+      mouse: '<path d="M34 9c-10 0-17 8-17 19v12c0 11 7 19 17 19s17-8 17-19V28c0-11-7-19-17-19Z"/><path d="M34 10v17m-17 0h34"/>',
+      watch: '<rect x="22" y="18" width="24" height="32" rx="8"/><path d="m28 18-2-9h16l-2 9m-12 32-2 9h16l-2-9M30 34h8m-8 6h5"/>',
+      fan: '<circle cx="34" cy="23" r="15"/><circle cx="34" cy="23" r="3"/><path d="M34 20q-2-10 4-10 5 1 1 11m-3 5q10 2 9 7-2 5-11 0m-3-3q-2 10-7 8-5-2 1-11M34 38v17m-11 5h22m-16-5-6 5m16-5 6 5"/>',
+      cooker: '<path d="M18 27h32l-3 25q-1 7-8 7H29q-7 0-8-7l-3-25Zm-2-8h36v8H16zm12-7h12v7M25 34h18"/><circle cx="34" cy="46" r="4"/>',
+      vacuum: '<path d="m40 11-8 29m0 0-7 16m7-16 10 13M24 56h23M39 11l7 2m-15 27 8 2"/><path d="m24 56-5 5h31l-3-5"/>'
     };
     return `<svg viewBox="0 0 68 68" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${icons[type] || icons.case}</svg>`;
   };
-  const cardArt = (product, index = 0) => `<div class="product-art product-art-${index % 4}${product.image ? " product-art--photo" : ""}" ${product.image ? "" : "aria-hidden=\"true\""}>${product.image ? `<img class="product-photo" src="${product.image}" alt="${product.name} packaging and product" loading="lazy" />` : `<span class="product-art-stamp">O-BEST / ${String(index + 1).padStart(2, "0")}</span><div class="product-object object-${product.icon}">${iconMarkup(product.icon)}</div><span class="art-spark">✳</span>`}</div>`;
+  const cardArt = (product, index = 0) => `<div class="product-art product-art-${index % 4}${product.image ? " product-art--photo" : ""}" ${product.image ? "" : "aria-hidden=\"true\""}>${product.image ? `<img class="product-photo" src="${product.image}" alt="${product.imageAlt || (product.itemType === "power-flex" ? `Supplier reference photo of ${product.name}` : `${product.name} packaging and product`)}" loading="lazy" />` : `<span class="product-art-stamp">O-BEST / ${String(index + 1).padStart(2, "0")}</span><div class="product-object object-${product.icon}">${iconMarkup(product.icon)}</div><span class="art-spark spark-icon" aria-hidden="true"></span>`}</div>`;
   const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="product.html?id=${encodeURIComponent(product.id)}" aria-label="View item details for ${product.name}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${itemTypeNames[product.itemType] || product.categoryName}</p><h2>${product.name}</h2><p class="product-card-description">${product.description}</p><div class="product-card-bottom"><span class="product-availability"><span class="availability-dot"></span><span>Ask us to check</span></span><span class="card-action-cue">View item details</span></div></div></a></article>`;
 
   document.querySelectorAll("[data-year]").forEach(el => el.textContent = new Date().getFullYear());
@@ -50,7 +55,7 @@
     };
     const startCarousel = () => {
       if (intervalId !== null || reducedMotionQuery.matches || document.hidden || !isInView || slides.length < 2) return;
-      intervalId = window.setInterval(() => showSlide((activeSlide + 1) % slides.length), 5000);
+      intervalId = window.setInterval(() => showSlide((activeSlide + 1) % slides.length), 3500);
     };
 
     if ("IntersectionObserver" in window) {
@@ -91,8 +96,11 @@
   }
   const observeReveal = element => {
     if (!element) return;
-    if (revealObserver) revealObserver.observe(element);
-    else element.classList.add("is-revealed");
+    // Catalogue grids can be much taller than the viewport. If we wait for
+    // the global observer's 12% visibility threshold, large grids never
+    // qualify and remain transparent after they are unhidden.
+    revealObserver?.unobserve(element);
+    element.classList.add("is-revealed");
   };
 
   const menuToggle = document.querySelector(".menu-toggle");
@@ -150,21 +158,39 @@
     const backButton = document.getElementById("category-back");
     const resultCount = document.getElementById("result-count");
     const emptyResults = document.getElementById("empty-results");
+    const normalizeSearch = value => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const productMatchesSearch = (product, term) => {
+      const searchableFields = [
+        product.name,
+        product.categoryName,
+        itemTypeNames[product.itemType],
+        product.description,
+        product.brand,
+        product.model,
+        product.capacity,
+        product.output,
+        product.details
+      ];
+      return normalizeSearch(searchableFields.filter(Boolean).join(" ")).includes(term);
+    };
     const catalogCategories = [
       { id: "power", name: "Power & charging", description: "Power banks, chargers and cables", icon: "charger", types: ["power-banks", "chargers", "cables"] },
       { id: "audio", name: "Audio & listening", description: "Earbuds and headphones", icon: "headphones", types: ["earbuds", "headphones"] },
+      { id: "computing", name: "Computing", description: "Mice and everyday computer accessories", icon: "mouse", types: ["mice"] },
+      { id: "wearables", name: "Wearables", description: "Smartwatches and wearable tech", icon: "watch", types: ["smartwatches"] },
+      { id: "home", name: "Home & appliances", description: "Fans and practical home appliances", icon: "fan", types: ["fans", "cookers", "vacuum-cleaners"] },
       { id: "protection", name: "Phone protection", description: "Cases and screen protectors", icon: "case", types: ["cases", "screen-protectors"] },
       { id: "parts", name: "Phone parts", description: "Screens, batteries and repair parts", icon: "screenpart", types: ["phone-screens", "phone-batteries", "sub-boards", "power-flex", "charging-ports"] }
     ];
-    const typeIcons = { "power-banks": "bank", chargers: "charger", cables: "cable", earbuds: "earbuds", headphones: "headphones", cases: "case", "screen-protectors": "screen", "phone-screens": "screenpart", "phone-batteries": "battery", "sub-boards": "board", "power-flex": "flex", "charging-ports": "port" };
+    const typeIcons = { "power-banks": "bank", chargers: "charger", cables: "cable", earbuds: "earbuds", headphones: "headphones", mice: "mouse", smartwatches: "watch", fans: "fan", cookers: "cooker", "vacuum-cleaners": "vacuum", cases: "case", "screen-protectors": "screen", "phone-screens": "screenpart", "phone-batteries": "battery", "sub-boards": "board", "power-flex": "flex", "charging-ports": "port" };
     let activeCategory = new URLSearchParams(location.search).get("category");
     if (!categoryNames[activeCategory]) activeCategory = "";
     let activeItemType = new URLSearchParams(location.search).get("type") || "";
     // Batch 1 is approved; batch 2 is now open for the next owner review.
     const products = (window.OBEST_PRODUCTS || []).filter(product => product.batch <= 2);
     const renderCategories = () => {
-      const term = (search?.value || "").trim().toLowerCase();
-      const matchingProducts = products.filter(product => `${product.name} ${product.categoryName} ${itemTypeNames[product.itemType] || ""} ${product.description}`.toLowerCase().includes(term));
+      const term = normalizeSearch(search?.value || "");
+      const matchingProducts = products.filter(product => productMatchesSearch(product, term));
       if (activeCategory) {
         const category = catalogCategories.find(item => item.id === activeCategory);
         const shownTypes = category.types.filter(type => {
@@ -195,19 +221,29 @@
       resultCount.textContent = activeCategory ? catalogCategories.find(item => item.id === activeCategory).name : term ? "Matching categories" : "Browse a category";
       emptyResults.hidden = categoryGrid.innerHTML !== "";
     };
-    const renderProducts = () => {
-      const term = (search?.value || "").trim().toLowerCase();
-      const items = products.filter(product => product.category === activeCategory && (!activeItemType || product.itemType === activeItemType) && (!term || `${product.name} ${product.categoryName} ${itemTypeNames[product.itemType] || ""} ${product.description}`.toLowerCase().includes(term)));
+    const renderProducts = (term = "") => {
+      const items = products.filter(product => {
+        const inSelectedCategory = !activeCategory || product.category === activeCategory;
+        const inSelectedType = !activeItemType || product.itemType === activeItemType;
+        return inSelectedCategory && inSelectedType && (!term || productMatchesSearch(product, term));
+      });
       grid.innerHTML = items.map(productCard).join("");
       categoryGrid.hidden = true;
       grid.hidden = false;
       observeReveal(grid);
-      backButton.hidden = false;
-      backButton.textContent = `${categoryNames[activeCategory]}`;
-      resultCount.textContent = `${items.length} ${items.length === 1 ? "product" : "products"} in ${activeItemType ? itemTypeNames[activeItemType] : categoryNames[activeCategory]}`;
+      backButton.hidden = !term && !activeCategory;
+      backButton.textContent = term ? "Clear search" : activeItemType ? categoryNames[activeCategory] : "All categories";
+      resultCount.textContent = term
+        ? `${items.length} matching ${items.length === 1 ? "product" : "products"}`
+        : `${items.length} ${items.length === 1 ? "product" : "products"} in ${activeItemType ? itemTypeNames[activeItemType] : categoryNames[activeCategory]}`;
       emptyResults.hidden = items.length !== 0;
     };
-    const render = () => activeCategory && activeItemType ? renderProducts() : renderCategories();
+    const render = () => {
+      const term = normalizeSearch(search?.value || "");
+      if (term) renderProducts(term);
+      else if (activeCategory && activeItemType) renderProducts();
+      else renderCategories();
+    };
     const openCategory = (category, type = "") => {
       activeCategory = category;
       activeItemType = type;
@@ -220,7 +256,9 @@
       if (button) openCategory(button.dataset.category, button.dataset.type || "");
     });
     backButton.addEventListener("click", () => {
-      if (activeItemType) {
+      if (search?.value.trim()) {
+        search.value = "";
+      } else if (activeItemType) {
         activeItemType = "";
         history.replaceState(null, "", `?category=${encodeURIComponent(activeCategory)}`);
       } else {
@@ -238,14 +276,15 @@
     const id = new URLSearchParams(location.search).get("id");
     const product = (window.OBEST_PRODUCTS || []).find(p => p.id === id);
     if (!product) {
-      detail.innerHTML = `<div class="not-found"><span>✳</span><h1>That item isn’t here yet.</h1><p>Explore the catalogue or tell us what you’re looking for.</p><a class="button button-blue" href="catalog.html">Browse catalogue </a></div>`;
+      detail.innerHTML = `<div class="not-found"><span class="spark-icon" aria-hidden="true"></span><h1>That item isn’t here yet.</h1><p>Explore the catalogue or tell us what you’re looking for.</p><a class="button button-blue" href="catalog.html">Browse catalogue </a></div>`;
     } else {
       document.title = `${product.name} | O-BEST`;
       const descriptionMeta = document.querySelector('meta[name="description"]');
       if (descriptionMeta) descriptionMeta.content = `${product.description} Ask O-BEST to check current availability.`;
       const specs = [product.brand && ["Brand", product.brand], product.model && ["Model", product.model], product.capacity && ["Capacity", product.capacity], product.output && ["Output", product.output], product.details && ["Details", product.details]].filter(Boolean);
       const specsMarkup = specs.length ? `<dl class="detail-specs">${specs.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>` : "";
-      detail.innerHTML = `<div class="detail-art-wrap">${cardArt(product, 1)}${product.image ? "" : "<span class=\"detail-art-note\">PHOTO<br />TO ADD</span>"}</div><div class="detail-copy"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${product.categoryName}</p><h1>${product.name}</h1><p class="availability-pill"><span class="availability-dot"></span> Ask us to check availability</p><p class="detail-description">${product.description}</p>${specsMarkup}<div class="detail-note"><span>✳</span><p>Need help checking compatibility? Send us your device model and ask us about this item.</p></div><a class="button button-yellow" href="request.html?item=${encodeURIComponent(product.name)}">Ask about this item </a><a class="text-link detail-back" href="catalog.html">Back to all products</a></div>`;
+       const photoSourceMarkup = product.photoSource ? `<p class="detail-photo-source">Supplier reference photo · <a href="${product.photoSource}" target="_blank" rel="noopener noreferrer">view source listing</a>. Confirm the exact part revision and compatibility with the seller.</p>` : "";
+       detail.innerHTML = `<div class="detail-art-wrap">${cardArt(product, 1)}${product.image ? "" : "<span class=\"detail-art-note\">PHOTO<br />TO ADD</span>"}</div><div class="detail-copy"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${product.categoryName}</p><h1>${product.name}</h1><p class="availability-pill"><span class="availability-dot"></span> Ask us to check availability</p><p class="detail-description">${product.description}</p>${photoSourceMarkup}${specsMarkup}<div class="detail-note"><span class="spark-icon" aria-hidden="true"></span><p>Need help checking compatibility? Send us your device model and ask us about this item.</p></div><a class="button button-yellow" href="request.html?item=${encodeURIComponent(product.name)}">Ask about this item </a><a class="text-link detail-back" href="catalog.html">Back to all products</a></div>`;
     }
   }
 

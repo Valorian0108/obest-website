@@ -12,13 +12,13 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 - **Prototype built:** static, dependency-free pages for Home, category-first Catalogue, product details, Request an item, About & Visit, Privacy, and a Guides hub with a locally drafted charging-accessory checklist awaiting owner review.
 - **Catalogue:** batch 1 (20 products) and batch 2 (8 products) are owner-approved. Product images are local assets. Taller photos now have more display space so packaging details are easier to read.
-- **Homepage photography:** the hero rotates through selected owner-supplied accessory/product photos, centered without an added card or labels and spaced above the yellow band. Confirm image-use permission and final composition before launch.
+- **Homepage photography:** the hero rotates through selected owner-supplied accessory/product photos, centered without an added card or labels and spaced above the yellow band. The owner approved the current website details; include the final composition in visual sign-off before launch.
 - **Custom category illustrations:** original local SVG object illustrations were added to the existing homepage category strip and category cards; artwork and placement remain open for owner/design review.
 - **Sourcing timing:** the owner confirmed that items not available in-store can be sourced within 24 hours after a customer request. Copy describes sourcing time only and does not promise delivery.
 - **Product policy:** prices remain blank, availability says “Ask us to check,” and unsupported claims should be removed rather than guessed.
 - **Contact configuration:** a WhatsApp number was previously confirmed, but the request form no longer opens WhatsApp. Item requests use the on-site form and `/api/request`; email delivery is unavailable until server-side configuration is completed.
 - **Inquiry recipient:** the owner has provided a private Gmail destination for inquiry notifications. Keep the exact address out of public site code and repository documentation; configure it only in the server-side deployment settings.
-- **Not production-ready:** the Vercel project exists and is linked; an initial deployment was automatically assigned to Production and subsequent builds are Preview deployments. Deployment protection blocks anonymous access. The sending domain/provider credentials are not set up, rate limiting is not configured, and the full privacy page and launch checks are incomplete. Email sending has a server-side feature flag and stays disabled unless deliberately enabled.
+- **Not production-ready:** the Vercel project exists and is linked; an initial deployment was automatically assigned to Production and subsequent builds are Preview deployments. Deployment protection blocks anonymous access. The sending domain/provider credentials are not set up, rate limiting is not configured, and some launch checks remain incomplete. Email sending has a server-side feature flag and stays disabled unless deliberately enabled.
 - **No dedicated inquiry database is needed for the initial version.** Email and service providers may still retain messages or operational logs; confirm their terms and settings before use.
 
 ## Step-by-step build plan
@@ -33,7 +33,7 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 **Done when:** the owner approves or corrects each visible listing, and there are no broken images, duplicate IDs, or invented stock, compatibility, warranty, or delivery claims.
 
-**Status:** Complete. Both batches approved by the owner.
+**Status:** Complete. Both batches approved by the owner; the owner reconfirmed the catalogue/site details on 1 October 2026.
 
 ### Phase 2: Define the real business offer and trust information
 
@@ -44,7 +44,7 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 **Done when:** a visitor can tell who operates the site, what the shop offers, and how to reach it without relying on unconfirmed claims.
 
-**Status:** Owner confirmed the public shop address (No. 1 Fadare Street, Iju-Ishaga, Ifako-Ijaiye, Lagos), Monday–Saturday hours (9:00 am–8:00 pm), public phone number, flyer-listed Instagram/TikTok handles, and that an engineer is on site. Owner indicated the public phone number is also used for WhatsApp; it is displayed as a phone link, without opening WhatsApp chat. Delivery is intentionally omitted and repairs are not advertised. Public details are reflected in `about.html` locally; owner should review before deployment.
+**Status:** Owner confirmed the public shop address (No. 1 Fadare Street, Iju-Ishaga, Ifako-Ijaiye, Lagos), Monday–Saturday hours (9:00 am–8:00 pm), public phone number, flyer-listed Instagram/TikTok handles, and that an engineer is on site. On 1 October 2026, the owner reconfirmed approval of the current site details and approved publication of the supplier reference photos. The public number is displayed as a phone link, without opening WhatsApp chat. Delivery is intentionally omitted and repairs are not advertised. Local visual/QA checks are not deployment approval.
 
 ### Phase 3: Replace the WhatsApp hand-off with a secure background inquiry
 
@@ -156,13 +156,13 @@ Use this queue to keep the review findings in scope and in a safe order. A task 
 - Ordinary paragraph text remains selectable and is not styled as a link. No decorative arrow glyphs were added.
 - **Status:** Implemented locally in `styles.css`; the previous 14 request-endpoint tests passed. These edits are local/uncommitted and are not in the current Preview deployment. Include them in a later reviewed deployment; do not deploy them separately without approval.
 
-### 0.1 Domain-independent QA pass — partial local verification; not deployed
+### 0.1 Domain-independent QA pass — local verification; not deployed
 
 - Scanned all nine HTML pages and checked 165 local links, anchors, stylesheets, scripts, and image targets; no missing targets. Checked page titles, descriptions, main/skip targets, and explicit `type="button"` on each navigation toggle.
 - Confirmed the selected product updates both the document title and meta description; verified the mobile navigation toggle's expanded state and open/close behavior, required request fields are labeled, and an empty request remains blocked by native validation.
 - Re-ran the request endpoint suite: all 14 tests pass. Local browser checks at its available ~985–1041 CSS-pixel viewport found no horizontal overflow or failed rendered images and no console errors on the eight primary pages plus the 404.
-- **Remaining:** The available browser session could not change its viewport/device emulation, so real phone-width (including 320–420 px) layout/touch checks are still required. A Lighthouse run was attempted but the browser harness failed before audit collection; no score is claimed. Re-check interaction/focus, contrast, and reduced-motion on mobile/Preview.
-- **Status:** All changes remain local; do not deploy without approval.
+- **Follow-up:** The browser harness can check phone-width layout in local frames but does not emulate a real handset or touch input. Re-check interaction/focus, contrast, and reduced-motion on a physical phone/Preview; verify the 404 and security headers on protected Preview.
+- **Status:** All changes remain local; do not deploy without approval. Homepage Lighthouse accessibility, best-practices and SEO audits returned 100% with no failures after correcting the brand-link accessible name. The request page audits likewise returned 100% in those categories with no failures. These local audit results are not a performance score or production check.
 
 ### 0.2 Homepage photography carousel — implemented locally; owner review pending
 
@@ -170,7 +170,7 @@ Use this queue to keep the review findings in scope and in a safe order. A task 
 - Added the selected images to `assets/homepage/` under descriptive names; originals remain preserved in `incoming/`. The hero uses one fixed square frame and `object-fit: contain`, so source images are not stretched or cropped. The transparent frame surround lets the hero's circular linework carry through behind the photo, with a slightly stronger light outline and yellow base accent rather than a floating white card; image name/count labels have been removed.
 - Images are centered in the blue hero area with a deliberate gap above the yellow band. They rotate automatically every five seconds with a slower 1.5-second crossfade. No carousel pause control is shown; the carousel stops when off-screen or the tab is hidden and stays static for reduced-motion preference. Images decode before rotation begins.
 - Mobile rendering checked at 320, 375, 414, and 760 CSS-pixel widths, plus the 768px desktop breakpoint. Kept the inner photo opening square, carried the circular hero linework behind the frame, verified image loading and the gap above the yellow band, and tuned the smallest-phone header and headline to avoid overflow and awkward wrapping.
-- **Remaining:** review the local photo/background integration with the owner. No deployment or Production change.
+- **Remaining:** the owner approved the current site details; retain the final photo/background composition as part of Preview sign-off. No deployment or Production change.
 
 ### 0.3 Additional supplied imagery — sorted locally; owner verification pending
 
@@ -190,7 +190,7 @@ Use this queue to keep the review findings in scope and in a safe order. A task 
 
 ### 2. Confirm public business details and launch basics — owner gate
 
-- Owner reviews the current public pages, catalogue, homepage illustrative photo, phone/social details, and the engineering-service wording. Keep claims within confirmed facts.
+- Owner confirmed the current website details and approved the supplier reference photos on 1 October 2026. Keep claims within confirmed facts; retain the separate draft-guide and final visual/composition review gates below.
 - Keep the About map action explicitly labeled as a Maps address search, not as a verified storefront pin, until the owner verifies the destination. The current link uses only the owner-confirmed street address and makes no coordinate/pin claim.
 - Ask the owner to provide actual terms/returns/refund rules if they want those pages. Do not publish template policies as if they were the shop's policy.
 - Add a branded 404 page and check response/hosting behavior so genuinely missing URLs use it.
@@ -219,12 +219,12 @@ Use this queue to keep the review findings in scope and in a safe order. A task 
 
 ## Immediate sequence
 
-1. Preserve the completed local link/focus work and passing 14 endpoint tests; complete actual phone-width and touch QA before calling responsive QA done. Do not deploy without approval.
-2. While waiting for the owner to choose/buy a domain, finish domain-independent Preview/local work: owner content review, owner verification of the Maps search destination, verify the new branded 404 and baseline security-header configuration on Preview, assess product metadata/pre-rendering, complete mobile/accessibility/broken-link checks, and measure image performance. Do not enable real email or change Production.
-3. Have the owner choose the public domain and create/own the Vercel, registrar, and Resend accounts; confirm the commercial hosting plan and any recurring costs before activating services.
+1. Preserve the local catalogue, interaction, accessibility, and deployment-exclusion fixes. Automated tests pass (18); local phone-width layout checks pass in iframes at 320, 375, and 414 px, and local Homepage/Request Lighthouse audits have no failures. Physical-device/touch QA and protected Preview checks remain. Do not deploy without approval.
+2. After explicit authorization to create a protected Preview (which requires publishing the current branch changes), verify the branded 404, security headers, Maps address-search destination, and the approved pages/photos; complete product metadata/pre-rendering assessment, Preview/mobile accessibility and touch checks, and image-performance measurement. This is not Production approval.
+3. The public domain `obestlink.com` is registered and active at Namecheap. Keep its DNS unchanged until the owner separately authorizes connecting it to the site and the launch gates are ready. Confirm owner control of Vercel and Resend accounts and any recurring plan cost before activation.
 4. Verify an owner-controlled sending domain/subdomain in Resend, set Vercel secrets and rate limiting, align privacy wording, and test real inbox delivery on a protected Preview before enabling customer email.
-5. After the public domain is chosen, finish canonical/social metadata, `robots.txt`, sitemap, structured data, and owner-verified Search Console setup.
-6. Get owner sign-off on public information and policies; measure image performance and optimize only where needed. Consider CMS, uptime monitoring, analytics, and AdSense separately and only with owner approval.
+5. Once the public launch and domain connection are approved, finish canonical/social metadata, `robots.txt`, sitemap, structured data, and owner-verified Search Console setup.
+6. Owner has approved the current website details and supplier-photo use. Keep the guide draft clearly marked until it receives its separate editorial review; get approval for any actual terms/returns policies before publishing. Measure image performance and optimize only where needed. Consider CMS, uptime monitoring, analytics, and AdSense separately and only with owner approval.
 
 ## Current implementation references
 
