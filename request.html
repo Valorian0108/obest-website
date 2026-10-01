@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#063b82" /><meta name="description" content="Tell O-BEST what phone accessory, gadget or part you’re looking for. We’ll check whether we can source it." /><title>Request an item | O-BEST</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a><div class="topline"><div class="topline-track"><div class="topline-message"><span class="topline-dot"></span><span>O-BEST LINK COMMUNICATION</span><span class="topline-divider">/</span><span>YOUR PLUG FOR QUALITY GADGET ACCESSORIES</span></div><div class="topline-message" aria-hidden="true"><span class="topline-dot"></span><span>O-BEST LINK COMMUNICATION</span><span class="topline-divider">/</span><span>YOUR PLUG FOR QUALITY GADGET ACCESSORIES</span></div></div><button class="topline-toggle" type="button" aria-label="Pause moving brand message" aria-pressed="false"></button></div>
+    <header class="site-header"><a class="brand" href="index.html" aria-label="O-BEST home"><span class="brand-mark">O<span>•</span></span><span class="brand-copy"><strong>O-BEST</strong><small>LINK COMMUNICATION</small></span></a><button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span></button><nav class="main-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="catalog.html">Explore products</a><a href="guides.html">Guides</a><a href="about.html">About &amp; visit</a><a class="active" href="request.html">Request an item</a></nav><a class="header-cta" href="catalog.html">Browse products </a></header>
+    <main id="main" class="request-main">
+      <section class="request-heading"><p class="eyebrow"><span class="eyebrow-line"></span> YOUR WISH LIST STARTS HERE</p><h1>Looking for<br /><span>something else?</span></h1><p>If an item isn’t in-store, we can source it within 24 hours after you request it.</p><div class="request-callout"><span>✳</span><div><strong>No pressure. No deposit to ask.</strong><small>We’ll confirm the price before you decide.</small></div></div></section>
+      <section class="request-form-wrap"><form id="request-form" class="request-form">
+        <div class="form-top"><span>O-BEST / ITEM REQUEST</span><span>01 of 05</span></div>
+        <label for="item-name">What are you looking for? <span>*</span><input id="item-name" name="item" required maxlength="120" placeholder="e.g. charging port for iPhone 12" /></label>
+        <label for="device-model">Phone or device model <small>if it’s a part or accessory</small><input id="device-model" name="model" maxlength="120" placeholder="e.g. Samsung A14" /></label>
+        <label for="request-details">Anything else we should know? <textarea id="request-details" name="details" rows="3" maxlength="1200" placeholder="Brand, colour, connector type, or a link to the item…"></textarea></label>
+        <label for="customer-name">Your name <small>optional</small><input id="customer-name" name="name" autocomplete="name" maxlength="100" placeholder="Name" /></label>
+        <label for="customer-contact">How can we reply? <span>*</span><input id="customer-contact" name="contact" autocomplete="email" required maxlength="160" placeholder="Phone number or email address" /></label>
+        <div class="form-trap" aria-hidden="true"><label for="company-website">Leave this field empty<input id="company-website" name="website" tabindex="-1" autocomplete="off" /></label></div>
+        <button class="button button-blue form-submit" type="submit">Send item request </button>
+        <p class="form-fineprint">When the request service is available, we’ll email your request to the shop so they can follow up. Submitting a request does not confirm price or availability.</p>
+        <p class="form-privacy">We use your details to review and reply to your request. Please don’t include passwords or payment details. <a href="privacy.html">Read our Privacy page</a>.</p>
+        <p id="form-status" class="form-status" aria-live="polite"></p>
+      </form></section>
+    </main>
+    <footer class="site-footer"><div class="footer-main"><a class="brand brand-footer" href="index.html"><span class="brand-mark">O<span>•</span></span><span class="brand-copy"><strong>O-BEST</strong><small>LINK COMMUNICATION</small></span></a><p>Your plug for quality gadget accessories.</p><a class="footer-link" href="catalog.html">Browse the catalogue </a></div><div class="footer-bottom"><span>© <span data-year></span> O-BEST Link Communication</span><span>Product availability is confirmed on request.</span><a href="about.html">About &amp; visit</a></div></footer>
+    <script src="products.js"></script><script src="app.js"></script>
+  </body>
+</html>

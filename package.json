@@ -1,0 +1,12 @@
+{
+  "name": "obest-link-communication-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static O-BEST Link Communication catalogue with a Vercel inquiry function.",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
