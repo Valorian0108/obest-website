@@ -50,7 +50,7 @@
     };
     const startCarousel = () => {
       if (intervalId !== null || reducedMotionQuery.matches || document.hidden || !isInView || slides.length < 2) return;
-      intervalId = window.setInterval(() => showSlide((activeSlide + 1) % slides.length), 7000);
+      intervalId = window.setInterval(() => showSlide((activeSlide + 1) % slides.length), 5000);
     };
 
     if ("IntersectionObserver" in window) {
