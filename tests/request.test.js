@@ -36,6 +36,20 @@ test("home and catalogue only link to categories and product types with listings
   assert.ok(configuredTypes.every(type => listedProducts.some(product => product.itemType === type)), "empty item types should not appear in the catalogue taxonomy");
 });
 
+test("the owner-approved charging checklist is presented as available general guidance", () => {
+  const root = path.resolve(__dirname, "..");
+  const guides = fs.readFileSync(path.join(root, "guides.html"), "utf8");
+  const article = fs.readFileSync(path.join(root, "charging-guide.html"), "utf8");
+
+  assert.match(guides, /01 GUIDE AVAILABLE/);
+  assert.match(guides, /class="guide-status-label">GENERAL CHECKLIST</);
+  assert.match(guides, /href="charging-guide\.html"/);
+  assert.doesNotMatch(guides, /DRAFT|FOR REVIEW|READY FOR REVIEW/);
+  assert.doesNotMatch(article, /DRAFT|FOR REVIEW|Editorial status:/);
+  assert.match(article, /not a compatibility guarantee/);
+  assert.match(article, /Google Pixel Help: Charge your Pixel phone/);
+});
+
 test("shared script marks only the current navigation route for assistive technology", () => {
   const app = fs.readFileSync(path.resolve(__dirname, "..", "app.js"), "utf8");
   assert.match(app, /const currentPath = location\.pathname === "\/" \? "\/index\.html" : location\.pathname/);

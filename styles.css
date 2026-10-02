@@ -51,7 +51,7 @@
 .guide-heading{max-width:800px;padding:10px 0 35px;border-bottom:1px solid var(--line)}
 .guide-heading .back-link{display:inline-block;margin-bottom:30px}
 .guide-heading .eyebrow{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 16px}
-.guide-draft-label{border:1px solid #e8d78c;background:#fff9df;padding:5px 8px;color:#705b12;font:800 8px var(--font-body);letter-spacing:.1em}
+.guide-status-label{border:1px solid #c8e2db;background:#eff8f4;padding:5px 8px;color:#176657;font:800 8px var(--font-body);letter-spacing:.1em}
 .guide-heading h1{max-width:760px;margin:0;color:var(--navy);font:700 clamp(42px,7vw,76px)/.98 var(--font-head);letter-spacing:-.075em;overflow-wrap:anywhere}
 .guide-deck{max-width:650px;margin:20px 0 13px;color:#53697a;font-size:16px;line-height:1.75}
 .guide-meta{margin:0;color:#7a8994;font-size:10px;font-weight:700;letter-spacing:.04em}

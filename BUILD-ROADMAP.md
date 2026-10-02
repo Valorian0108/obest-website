@@ -10,7 +10,7 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 ## Current state
 
-- **Prototype built:** static, dependency-free pages for Home, category-first Catalogue, product details, Request an item, About & Visit, Privacy, and a Guides hub with a locally drafted charging-accessory checklist awaiting owner review.
+- **Prototype built:** static, dependency-free pages for Home, category-first Catalogue, product details, Request an item, About & Visit, Privacy, and a Guides hub with one owner-approved, publicly visible general charging-accessory checklist.
 - **Catalogue:** `products.js` contains 130 records (20 batch 1 and 110 batch 2), all currently visible. The owner explicitly approved the current visible catalogue/listings on 2 October 2026, including the 102 records added after the earlier 20 + 8 review. Product images are local assets. Taller photos now have more display space so packaging details are easier to read.
 - **Homepage photography:** the hero rotates through selected owner-supplied accessory/product photos, centered without an added card or labels and spaced above the yellow band. The owner approved the current website details; include the final composition in visual sign-off before launch.
 - **Illustrations:** original local SVG object illustrations are used in the homepage category strip and category cards. On 2 October 2026, the owner approved the current visible illustrations, including the updated orbit/star and charger-and-cable artwork.
@@ -113,7 +113,7 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 **Done when:** each guide solves a real visitor question, is fact-checked, safely scoped, and has a named person responsible for future review.
 
-**Status:** A Guides hub is present locally at `guides.html`; one original charging-accessory buying-checklist draft is at `charging-guide.html`, with manufacturer sources and scope limits. The other listed subjects are explicitly marked planned, not published advice. The current article is not approved as a public guide: the shop must decide it can maintain advice, assign a reviewer, and sign off on the content before launch or promotion. The catalogue includes an inline, dismissible charger-checklist suggestion that appears once per browser tab session with a short entrance delay; it is not a modal or fixed overlay. Site motion is limited to a slow, pausable brand ticker and subtle section reveals, with animations disabled for visitors who request reduced motion.
+**Status:** The Guides hub at `guides.html` includes one owner-approved, publicly visible general charging-accessory checklist at `charging-guide.html`, with manufacturer sources, clear scope limits, and no device-specific compatibility promises. Other listed subjects remain planned, not published advice. Assign an editorial owner and review schedule as ongoing maintenance before expanding the guide library. The catalogue includes an inline, dismissible charger-checklist suggestion that appears once per browser tab session with a short entrance delay; it is not a modal or fixed overlay. Site motion is limited to a slow, pausable brand ticker and subtle section reveals, with animations disabled for visitors who request reduced motion.
 
 ### Phase 7: Decide whether to offer repairs
 
@@ -254,7 +254,7 @@ Use this queue to keep the review findings in scope and in a safe order. A task 
 - `about.html`: shop offer, public visit information, phone contact, and flyer-listed social links.
 - `privacy.html`: plain-language explanation of request information, use, providers, and how to contact the shop with privacy questions.
 - `guides.html`: guide hub; additional article topics are marked planned.
-- `charging-guide.html`: manufacturer-sourced charging-accessory buying-guide draft; owner review is pending.
+- `charging-guide.html`: owner-approved general charging-accessory buying checklist, with manufacturer source and compatibility caveats.
 - `products.js`: product catalogue and review batches.
 - `app.js`: catalogue behavior and on-site inquiry form submission.
 - `api/request.js`: Vercel Function; validates requests and sends through Resend when configured.
