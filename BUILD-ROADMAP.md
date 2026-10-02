@@ -11,14 +11,14 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 ## Current state
 
 - **Prototype built:** static, dependency-free pages for Home, category-first Catalogue, product details, Request an item, About & Visit, Privacy, and a Guides hub with a locally drafted charging-accessory checklist awaiting owner review.
-- **Catalogue:** batch 1 (20 products) and batch 2 (8 products) are owner-approved. Product images are local assets. Taller photos now have more display space so packaging details are easier to read.
+- **Catalogue:** `products.js` contains 130 records (20 batch 1 and 110 batch 2), all currently visible. The owner explicitly approved the current visible catalogue/listings on 2 October 2026, including the 102 records added after the earlier 20 + 8 review. Product images are local assets. Taller photos now have more display space so packaging details are easier to read.
 - **Homepage photography:** the hero rotates through selected owner-supplied accessory/product photos, centered without an added card or labels and spaced above the yellow band. The owner approved the current website details; include the final composition in visual sign-off before launch.
-- **Custom category illustrations:** original local SVG object illustrations were added to the existing homepage category strip and category cards; artwork and placement remain open for owner/design review.
+- **Illustrations:** original local SVG object illustrations are used in the homepage category strip and category cards. On 2 October 2026, the owner approved the current visible illustrations, including the updated orbit/star and charger-and-cable artwork.
 - **Sourcing timing:** the owner confirmed that items not available in-store can be sourced within 24 hours after a customer request. Copy describes sourcing time only and does not promise delivery.
 - **Product policy:** prices remain blank, availability says “Ask us to check,” and unsupported claims should be removed rather than guessed.
-- **Contact configuration:** a WhatsApp number was previously confirmed, but the request form no longer opens WhatsApp. Item requests use the on-site form and `/api/request`; email delivery is unavailable until server-side configuration is completed.
+- **Contact configuration:** the confirmed public phone number is displayed as a phone link; the request form does not open WhatsApp. Item requests use the on-site form and `/api/request`; the owner confirmed receipt of the labeled protected-Preview email test on 2 October 2026. Inquiry email remains disabled until the remaining readiness checks and owner launch approval are complete.
 - **Inquiry recipient:** the owner has provided a private Gmail destination for inquiry notifications. Keep the exact address out of public site code and repository documentation; configure it only in the server-side deployment settings.
-- **Not production-ready:** the Vercel project exists and is linked; an initial deployment was automatically assigned to Production and subsequent builds are Preview deployments. Deployment protection blocks anonymous access. The sending domain/provider credentials are not set up, rate limiting is not configured, and some launch checks remain incomplete. Email sending has a server-side feature flag and stays disabled unless deliberately enabled.
+- **Not production-ready:** the Vercel project exists and is linked; an initial deployment was automatically assigned to Production and subsequent builds are Preview deployments. Deployment protection blocks anonymous access. The `inquiries.obestlink.com` sending domain is verified in Resend and the four inquiry environment variable names are configured for Preview (values are hidden); `INQUIRY_ENABLED=false` keeps delivery disabled. The Vercel Firewall rule `Limit item inquiry submissions` is published for `POST /api/request` at 5 requests per IP per 60 seconds, including Production. Real inbox receipt and some launch checks remain unverified; do not treat the Production deployment or published firewall rule as launch approval.
 - **No dedicated inquiry database is needed for the initial version.** Email and service providers may still retain messages or operational logs; confirm their terms and settings before use.
 
 ## Step-by-step build plan
@@ -26,14 +26,14 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 ### Phase 1: Finish the shop catalogue
 
 **Work**
-- Owner reviews all 8 visible batch-2 products: names, photos, descriptions, specifications, and whether each should be offered.
+- The owner approved the current visible listing set (all 130 products) on 2 October 2026. Keep each listing's claims accurate and update availability only from current shop confirmation.
 - Confirm what product categories the shop actually carries. Hide empty categories from both Home and Catalogue until there is real inventory or useful content for them.
 - Set availability only from current shop confirmation; do not publish prices until the owner chooses to do so.
 - Keep exact product claims tied to confirmed details. Use accurate, standalone product photos and useful alt text.
 
-**Done when:** the owner approves or corrects each visible listing, and there are no broken images, duplicate IDs, or invented stock, compatibility, warranty, or delivery claims.
+**Done when:** the owner-approved visible listing set has no broken images, duplicate IDs, or invented stock, compatibility, warranty, or delivery claims.
 
-**Status:** Complete. Both batches approved by the owner; the owner reconfirmed the catalogue/site details on 1 October 2026.
+**Status:** The owner approved the current 130 visible product listings on 2 October 2026, resolving the discrepancy with the earlier 20 + 8 approval record. Continue routine accuracy checks for stock, specifications, images, and claims; no product-approval gate remains for this visible set.
 
 ### Phase 2: Define the real business offer and trust information
 
@@ -44,11 +44,11 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 **Done when:** a visitor can tell who operates the site, what the shop offers, and how to reach it without relying on unconfirmed claims.
 
-**Status:** Owner confirmed the public shop address (No. 1 Fadare Street, Iju-Ishaga, Ifako-Ijaiye, Lagos), Monday–Saturday hours (9:00 am–8:00 pm), public phone number, flyer-listed Instagram/TikTok handles, and that an engineer is on site. On 1 October 2026, the owner reconfirmed approval of the current site details and approved publication of the supplier reference photos. The public number is displayed as a phone link, without opening WhatsApp chat. Delivery is intentionally omitted and repairs are not advertised. Local visual/QA checks are not deployment approval.
+**Status:** Owner confirmed the public shop address (No. 1 Fadare Street, Iju-Ishaga, Ifako-Ijaiye, Lagos), Monday–Saturday hours (9:00 am–8:00 pm), public phone number, flyer-listed Instagram/TikTok handles, and that an engineer is on site. On 1 October 2026, the owner reconfirmed approval of the current site details and approved publication of the supplier reference photos. The public number is displayed as a phone link, without opening WhatsApp chat. Delivery is intentionally omitted and the limited engineering service is described without repair booking/guarantees. Local visual/QA checks are not deployment approval.
 
 ### Phase 3: Replace the WhatsApp hand-off with a secure background inquiry
 
-**Selected initial architecture:** keep the catalogue static on Vercel; use a Vercel Function at an API route; validate requests on the server and apply rate limiting with Vercel Firewall; send accepted enquiries to the shop's Gmail with Resend; do not add a submissions database initially. The owner approved Resend; accounts and domain setup are still pending.
+**Selected initial architecture:** keep the catalogue static on Vercel; use a Vercel Function at an API route; validate requests on the server and apply rate limiting with Vercel Firewall; send accepted enquiries to the shop's Gmail with Resend; do not add a submissions database initially. Resend is owner-approved; the `inquiries.obestlink.com` sender is verified, Preview variable names are configured, and the Firewall limit is published. The owner confirmed receipt of a labeled protected-Preview test on 2 October 2026. Keep delivery disabled until remaining readiness checks and owner launch approval are complete.
 
 **Work**
 1. Use Vercel Functions for the endpoint and Resend for transactional email. Keep both accounts owner-controlled. Check current pricing, privacy terms, retention/log settings, and account ownership before production use.
@@ -65,13 +65,13 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 **Done when:** tested submissions stay on the website; success appears only on provider acceptance; failures are visible; spam controls work; the shop receives the email; secrets are absent from client files; and privacy wording matches actual provider behavior. The required Vercel Firewall rate-limit configuration is tracked in Phase 4 and must be complete before real submissions are enabled.
 
-**Status:** Form markup, browser submission, Vercel Function, honeypot, automated endpoint tests, and a local plain-language Privacy page are implemented. Email delivery remains disabled pending owner-controlled provider setup and launch checks. Local automated tests use a mock Resend response.
+**Status:** Form markup, browser submission, Vercel Function, honeypot, automated endpoint tests, and a plain-language Privacy page are implemented. Resend sending-domain verification, Preview inquiry-variable configuration, and the Vercel Firewall rate limit are complete. The owner confirmed receipt of the labeled protected-Preview email test on 2 October 2026. A separately authorized, filtered protected Preview was reviewed on 2 October: security headers, branded 404, API method handling, and the disabled-service/no-send response behaved as expected; the request page Lighthouse accessibility, best-practices, and SEO scores were all 100 with no failures. `INQUIRY_ENABLED` remains false pending provider privacy/retention review, a safe rate-limit verification plan, remaining device checks, and launch approval. Local automated tests use mocked provider responses; they do not prove live duplicate suppression.
 
 ### Phase 4: Establish production foundations
 
 **Work**
 - Use Vercel for static delivery and the serverless endpoint. A custom website domain is optional for local development and staging. Resend requires a domain owned by the shop and verified for production sending; it may be a dedicated sending subdomain and does not have to be the website's public hostname.
-- Configure a Vercel Firewall rate limit for `POST /api/request` and review the current plan's rate-limit availability and pricing. Keep `INQUIRY_ENABLED` unset/false until this is active and tested. The endpoint's honeypot is only a basic bot signal, not a substitute for rate limiting.
+- **Completed:** the Vercel Firewall rule `Limit item inquiry submissions` limits `POST /api/request` to 5 requests per IP per 60 seconds and is published, including for Production. Confirm the rule still applies as configured during protected Preview/Production verification; do not remove it or enable email as part of local review. The endpoint's honeypot is only a basic bot signal, not a substitute for rate limiting.
 - Configure a verified sender identity with the email-delivery provider. Do not assume the recipient Gmail can be used as the sender domain; follow the provider's authentication requirements (such as SPF/DKIM) for the domain used to send mail.
 - Put the project under version control with a documented, repeatable deployment path. Keep secrets out of source control and provide a rollback path.
 - Serve only over HTTPS; configure domain redirects and secure headers where the host supports them.
@@ -81,7 +81,7 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 **Done when:** the production domain is stable; deployment and rollback are understood; pages and form pass the agreed device/browser checks; and no test or placeholder details are public.
 
-**Status:** Vercel deployment exists. The current Preview is Ready, but deployment protection is enabled so customers cannot access it anonymously. Initial deployment became the project's Production target automatically; do not treat it as a reviewed public launch. Real email delivery needs a verified sending domain and server-side credentials.
+**Status:** the current Preview is Ready but protected from anonymous access. An initial deployment became the project's Production target automatically; do not treat it as a reviewed public launch. The sending domain is verified, Preview variable names are configured with values hidden, and the Firewall limit is published. The owner confirmed receipt of a clearly labeled protected-Preview test on 2 October 2026. Keep `INQUIRY_ENABLED=false` until remaining checks are complete and the owner approves launch.
 
 ### Phase 5: Launch and operate the catalogue
 
@@ -150,47 +150,66 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 Use this queue to keep the review findings in scope and in a safe order. A task is not complete just because its code exists: owner-controlled setup, verification, and any required approval are part of its done condition. Do not deploy or change Production without explicit approval.
 
-### 0. Interaction discoverability — complete locally; not deployed
+### 0. Interaction discoverability — included in protected Preview review; Production unchanged
 
 - Persistent underlines distinguish standalone text links before hover; keyboard focus has a high-contrast indicator; card action cues remain visible and do not replace availability wording.
 - Ordinary paragraph text remains selectable and is not styled as a link. No decorative arrow glyphs were added.
-- **Status:** Implemented locally in `styles.css`; the previous 14 request-endpoint tests passed. These edits are local/uncommitted and are not in the current Preview deployment. Include them in a later reviewed deployment; do not deploy them separately without approval.
+- **Status:** Implemented in the working copy and included in the filtered protected Preview review. The edits remain local/uncommitted; Production was not changed.
 
-### 0.1 Domain-independent QA pass — local verification; not deployed
+### 0.0 Inventory-driven category navigation — protected Preview reviewed; Production unchanged
+
+- The Home page no longer promotes Phone protection while there are no protection listings. Its category links now point only to catalogue categories with visible products.
+- The catalogue taxonomy contains only real item types, and category/type visibility is derived from the currently displayed product records so stale or future empty categories cannot appear as zero-product promises.
+- Invalid or stale category/type query parameters safely return to the all-category view; a category with valid inventory but an invalid type falls back to that category's type choices. Search comparisons use the same accent-insensitive normalization as product search.
+- The shared script applies `aria-current="page"` to the matching main-navigation link, including the root homepage path.
+- Available phone screens sort alphabetically and expose brand filter chips derived from current inventory (Apple, Infinix, Samsung, TECNO, Xiaomi); counts and selected state are shown, filters are keyboard-accessible buttons, and a selected brand is preserved in the URL. Selecting “All brands” clears only the brand filter.
+- Regression tests cover homepage links, catalogue taxonomy against product data, current-page navigation state, contrast, phone-screen availability, and brand filtering. Local checks: all 25 tests pass; catalogue Lighthouse accessibility, best-practices and SEO are each 100% with no failures after the filter and product-link accessibility updates. Brand buttons show inventory counts, selected state, and a mobile-stacked layout. Local results are not Preview/production sign-off.
+- **Status:** Complete and included in the filtered protected Preview review. No inventory records or inquiry settings were changed; Production was not changed.
+
+### 0.1 Domain-independent QA pass — protected Preview checks complete; physical-device QA remains
 
 - Scanned all nine HTML pages and checked 165 local links, anchors, stylesheets, scripts, and image targets; no missing targets. Checked page titles, descriptions, main/skip targets, and explicit `type="button"` on each navigation toggle.
 - Confirmed the selected product updates both the document title and meta description; verified the mobile navigation toggle's expanded state and open/close behavior, required request fields are labeled, and an empty request remains blocked by native validation.
-- Re-ran the request endpoint suite: all 14 tests pass. Local browser checks at its available ~985–1041 CSS-pixel viewport found no horizontal overflow or failed rendered images and no console errors on the eight primary pages plus the 404.
-- **Follow-up:** The browser harness can check phone-width layout in local frames but does not emulate a real handset or touch input. Re-check interaction/focus, contrast, and reduced-motion on a physical phone/Preview; verify the 404 and security headers on protected Preview.
-- **Status:** All changes remain local; do not deploy without approval. Homepage Lighthouse accessibility, best-practices and SEO audits returned 100% with no failures after correcting the brand-link accessible name. The request page audits likewise returned 100% in those categories with no failures. These local audit results are not a performance score or production check.
+- A filtered protected Preview was created with explicit authorization from the current working copy. Its bundle contains the site pages, request function, and referenced visible-site assets; it excludes roadmap/research notes, tests, and unreferenced incoming uploads. No Production deployment or DNS change was made.
+- Protected Preview checks: `/` and `/request.html` load; an unknown path returns the branded 404 with HTTP 404; baseline security headers are present on page and API responses; `GET /api/request` returns 405 with `Allow: POST`; a valid no-send POST returns 503 and truthfully says details were not sent while inquiry delivery is disabled. The request page had no browser console warnings/errors or failed images. Its Lighthouse accessibility, best-practices and SEO audits each scored 100 with no failures (not a performance score).
+- Local endpoint suite: all 28 tests pass. Do not deliberately exceed the live 5-per-IP/60-second rate limit because that Firewall rule also applies to Production; its configuration is confirmed, but triggered behavior remains unverified. Live provider duplicate suppression is also unverified; the repeat-key test uses a mock.
+- **Follow-up:** The browser harness did not provide a real phone viewport/touch emulator during this pass. Physical-device touch, focus, contrast, and reduced-motion QA remain outstanding. Provider privacy/retention settings need owner review before launch.
+- **Status:** This is protected Preview QA only, not Production sign-off or launch approval. Inquiry sending remains disabled.
 
-### 0.2 Homepage photography carousel — implemented locally; owner review pending
+### 0.2 Homepage photography carousel — implemented locally; composition sign-off remains part of Preview review
 
 - Replaced the existing illustrative hero photo with owner-supplied images. The selected set includes the RGB mouse, multi-connector cable, colourful USB drives, portable and feature-phone products, charging and data accessories, screen protectors, a keyboard/mouse and earbuds. Mixed Oraimo/shop displays, repair imagery and compatibility charts are not used in the hero.
 - Added the selected images to `assets/homepage/` under descriptive names; originals remain preserved in `incoming/`. The hero uses one fixed square frame and `object-fit: contain`, so source images are not stretched or cropped. The transparent frame surround lets the hero's circular linework carry through behind the photo, with a slightly stronger light outline and yellow base accent rather than a floating white card; image name/count labels have been removed.
 - Images are centered in the blue hero area with a deliberate gap above the yellow band. They rotate automatically every five seconds with a slower 1.5-second crossfade. No carousel pause control is shown; the carousel stops when off-screen or the tab is hidden and stays static for reduced-motion preference. Images decode before rotation begins.
 - Mobile rendering checked at 320, 375, 414, and 760 CSS-pixel widths, plus the 768px desktop breakpoint. Kept the inner photo opening square, carried the circular hero linework behind the frame, verified image loading and the gap above the yellow band, and tuned the smallest-phone header and headline to avoid overflow and awkward wrapping.
-- **Remaining:** the owner approved the current site details; retain the final photo/background composition as part of Preview sign-off. No deployment or Production change.
+- **Remaining:** retain the final photo/background composition as part of Preview sign-off. The separate current visible illustrations have owner approval. No deployment or Production change.
 
-### 0.3 Additional supplied imagery — sorted locally; owner verification pending
+### 0.3 Additional supplied imagery — sorted locally; owner verification pending for unlisted identities/uses
 
 - Visually reviewed all 24 uploaded JPEGs and compared them with the existing named product assets using SHA-256 hashes. Three are exact duplicates of the already organized homepage mouse, cable, and USB-drive images; the originals remain in `incoming/` without creating redundant copies.
 - Organized 11 distinct product/accessory photos in the homepage carousel assets. The photos remain uncropped and use neutral, visually grounded alt text; the five-second timing, crossfade, frame, and reduced-motion behavior apply consistently to all slides.
 - Sorted 10 compatibility charts, repair/lifestyle images, and mixed shop displays under `assets/reference/`; these are not individual product photos and are not shown in the carousel.
 - Preserved all source images in `incoming/`. The new photos have not been added as catalogue records in `products.js`. Some model identities are unclear; confirm product details and image-use permission with the owner before cataloguing or launch.
 
+### 0.4 TECNO phone-screen research — Batch 3 is separate and not customer-visible
+
+- Recorded two source-linked, non-duplicate research candidates in [`TECNO-RESEARCH-BATCH-3.md`](TECNO-RESEARCH-BATCH-3.md): TECNO Spark 30 4G (KL6) and Spark 40 4G (KM5). The owner-provided images show model markings; independent supplier references and device specifications are documented separately.
+- The Spark 40/KM5 supplier image and listings also mention other models. Those grouped compatibility claims remain unverified and are not included as fit claims.
+- The research file is not loaded by the website. `products.js`, the approved 130 visible listings, and the catalogue display filter are unchanged. No supplier images were copied into the site assets.
+- **Status:** Two candidates documented toward the 50-model research target; research and owner review remain incomplete. Neither candidate is approved for customer display or compatibility claims.
+
 ### 1. Make item-request delivery genuinely operational — launch blocker
 
 - Keep the request journey on the website. Do not add WhatsApp click-to-chat or send item requests to WhatsApp.
-- Under owner-controlled accounts, finish Resend setup, verify an owner-controlled sending domain/subdomain, configure Vercel server-side secrets, and keep `INQUIRY_ENABLED` false until every prerequisite is ready.
-- Configure and test a Vercel Firewall rate limit for `POST /api/request`; the existing honeypot and validation are not a substitute for rate limiting.
-- Update privacy wording only after confirming the actual Vercel, Resend, and Gmail processing and retention behavior.
-- Test valid delivery to the real shop inbox on a protected Preview, plus validation, honeypot, rate-limit, provider-failure, retry, and duplicate behavior. Confirm the on-page message is truthful.
+- Resend sender verification, Preview inquiry variable configuration, and the Vercel Firewall rate limit are already in place. The owner confirmed receipt of a clearly labeled protected-Preview test on 2 October 2026. Confirm the owner still controls the accounts and keep `INQUIRY_ENABLED=false` until the remaining privacy/launch gates are complete and launch is approved.
+- The published Firewall rule is enabled and configured to limit `POST /api/request` to 5 requests per IP per 60 seconds. Its configuration is confirmed; local tests cover validation and honeypot rejection. Triggered rate-limit behavior remains unverified because the shared rule also applies to Production and was not deliberately exceeded. Do not enable customer submissions until this is verified under an owner-approved safe plan.
+- Owner confirmed on 2 October 2026: Vercel is on Hobby; Build Logs and Source Protection is enabled; project deployment retention is 30 days; Gmail is a personal account, accessible only to the owner, and the owner plans to delete inquiry mail after 30 days. Resend's published policy states 30-day retention for email content, metadata, delivery events, logs and metrics. Updated `privacy.html` and README to describe these facts, including Gmail Trash's additional up-to-30-day recovery window and Vercel's one-hour Hobby runtime-log retention/indefinite build-log retention. The owner subsequently confirmed Resend admin MFA is enabled. Reconfirm if plans/settings or practices change; this is an operational disclosure, not legal advice.
+- The owner confirmed receipt of one clearly labeled valid delivery test on protected Preview on 2 October 2026; the endpoint returned HTTP 200. The separately authorized filtered Preview also returned the expected 503/no-send response with `INQUIRY_ENABLED=false`. Local automated tests (28 passing on 2 October 2026) cover malformed and invalid input, honeypot, disabled configuration, provider/network failures, and forwarding the same idempotency key on a repeat. These mocks do not prove live provider duplicate suppression or triggered rate-limit behavior. Provider retention information has been reviewed and the plain-language disclosure updated to owner-confirmed settings; physical-device checks and safe rate-limit verification remain. Keep `INQUIRY_ENABLED=false` until all remaining checks pass and the owner explicitly approves launch; the on-page disabled-state copy is truthful.
 - **Done when:** the owner confirms receipt in the shop inbox, errors and rate limits behave safely, privacy copy matches the real flow, and the owner approves the form for launch. Never expose the private receiving address or provider credentials in client files.
 
 ### 2. Confirm public business details and launch basics — owner gate
 
-- Owner confirmed the current website details and approved the supplier reference photos on 1 October 2026. Keep claims within confirmed facts; retain the separate draft-guide and final visual/composition review gates below.
+- Owner confirmed the current website details and approved the supplier reference photos on 1 October 2026. On 2 October 2026, the owner explicitly approved all 130 currently visible catalogue/listings and the current visible illustrations. Keep claims within confirmed facts; retain the separate draft-guide and final hero photo/composition review gates below.
 - Keep the About map action explicitly labeled as a Maps address search, not as a verified storefront pin, until the owner verifies the destination. The current link uses only the owner-confirmed street address and makes no coordinate/pin claim.
 - Ask the owner to provide actual terms/returns/refund rules if they want those pages. Do not publish template policies as if they were the shop's policy.
 - Add a branded 404 page and check response/hosting behavior so genuinely missing URLs use it.
@@ -219,10 +238,10 @@ Use this queue to keep the review findings in scope and in a safe order. A task 
 
 ## Immediate sequence
 
-1. Preserve the local catalogue, interaction, accessibility, and deployment-exclusion fixes. Automated tests pass (18); local phone-width layout checks pass in iframes at 320, 375, and 414 px, and local Homepage/Request Lighthouse audits have no failures. Physical-device/touch QA and protected Preview checks remain. Do not deploy without approval.
+1. Preserve the local catalogue, interaction, accessibility, and deployment-exclusion fixes. Automated tests pass (28); local phone-width layout checks pass in iframes at 320, 375, and 414 px, and local Homepage/Request/Catalogue Lighthouse audits have no failures. Physical-device/touch QA and protected Preview checks remain. Do not deploy without approval.
 2. After explicit authorization to create a protected Preview (which requires publishing the current branch changes), verify the branded 404, security headers, Maps address-search destination, and the approved pages/photos; complete product metadata/pre-rendering assessment, Preview/mobile accessibility and touch checks, and image-performance measurement. This is not Production approval.
 3. The public domain `obestlink.com` is registered and active at Namecheap. Keep its DNS unchanged until the owner separately authorizes connecting it to the site and the launch gates are ready. Confirm owner control of Vercel and Resend accounts and any recurring plan cost before activation.
-4. Verify an owner-controlled sending domain/subdomain in Resend, set Vercel secrets and rate limiting, align privacy wording, and test real inbox delivery on a protected Preview before enabling customer email.
+4. Confirm owner access to Resend/Vercel and review actual provider retention/privacy settings. A clearly labeled protected-Preview delivery test was received by the owner on 2 October 2026. The verified sender, Preview variable names, and published rate-limit rule are already configured. Keep `INQUIRY_ENABLED=false` until the remaining launch checks are confirmed and the owner approves launch.
 5. Once the public launch and domain connection are approved, finish canonical/social metadata, `robots.txt`, sitemap, structured data, and owner-verified Search Console setup.
 6. Owner has approved the current website details and supplier-photo use. Keep the guide draft clearly marked until it receives its separate editorial review; get approval for any actual terms/returns policies before publishing. Measure image performance and optimize only where needed. Consider CMS, uptime monitoring, analytics, and AdSense separately and only with owner approval.
 
@@ -231,7 +250,7 @@ Use this queue to keep the review findings in scope and in a safe order. A task 
 - `index.html`: homepage, rotating product-photo hero, current category introduction, and entry points to the guide and shop details.
 - `catalog.html`: category-first browse flow.
 - `product.html`: product detail shell.
-- `request.html`: on-site item request form; email delivery is not enabled until server settings are configured. The private recipient address is owner-confirmed but intentionally not recorded in this public-facing project documentation.
+- `request.html`: on-site item request form; a clearly labeled protected-Preview email test was confirmed received on 2 October 2026. Customer email delivery remains disabled pending remaining launch checks and owner approval. The private recipient address is owner-confirmed but intentionally not recorded in this public-facing project documentation.
 - `about.html`: shop offer, public visit information, phone contact, and flyer-listed social links.
 - `privacy.html`: plain-language explanation of request information, use, providers, and how to contact the shop with privacy questions.
 - `guides.html`: guide hub; additional article topics are marked planned.

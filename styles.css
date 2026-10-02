@@ -208,6 +208,18 @@ body{font-family:var(--font-body);font-size:16px;font-weight:500;color:var(--ink
   .footer-link,.footer-bottom a{font-size:12px}
 }
 .eyebrow-dark{color:#53697a}
+.catalog-intro h1 span{color:#08736e}
+.availability-dot--available{background:#16803c;box-shadow:0 0 0 3px rgba(22,128,60,.18);animation:availability-pulse 1.8s ease-in-out infinite}
+.availability-pill .availability-dot--available{background:#16803c}
+.catalog-brand-filter{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:0 0 18px}
+.catalog-brand-filter-label{color:var(--navy);font:700 11px var(--font-head)}
+.catalog-brand-chips{display:flex;flex-wrap:wrap;gap:7px}
+.catalog-brand-chips .filter-chip{height:35px;padding:0 13px;font-size:11px}
+.catalog-brand-chips .filter-chip span{margin-left:5px;opacity:.78;font-size:10px}
+.catalog-brand-chips .filter-chip:not(.active) span{color:#536779;opacity:1}
+@media(max-width:760px){.catalog-brand-filter{align-items:flex-start;flex-direction:column;gap:8px}.catalog-brand-chips{gap:6px}.catalog-brand-chips .filter-chip{height:36px;padding:0 11px}}
+@keyframes availability-pulse{0%,100%{box-shadow:0 0 0 3px rgba(22,128,60,.18)}50%{box-shadow:0 0 0 6px rgba(22,128,60,.05)}}
+@media(prefers-reduced-motion:reduce){.availability-dot--available{animation:none;box-shadow:0 0 0 3px rgba(22,128,60,.18)}}
 .category-audio{background:#087b76}
 .category-audio .category-index{color:#fff}
 .category-index{opacity:1}
@@ -244,6 +256,7 @@ body{font-family:var(--font-body);font-size:16px;font-weight:500;color:var(--ink
 .motion-ready .category-card{transition:transform .28s cubic-bezier(.2,.7,.25,1),box-shadow .28s ease}
 .guide-browse-nudge.is-pending{opacity:0;transform:translateY(8px);visibility:hidden}
 @media(max-width:760px){.topline{justify-content:flex-start;padding:0 34px 0 0}.topline-message{font-size:7px;letter-spacing:.08em;padding:0 24px}.topline-toggle{right:5px;width:24px;height:24px}}
+@media(max-width:760px){.topline-toggle{opacity:1}}
 @media(prefers-reduced-motion:reduce){.topline-track{animation:none;transform:none;width:100%;justify-content:center}.topline-message[aria-hidden="true"]{display:none}.topline-toggle{display:none}.motion-ready main>section:not(.hero){opacity:1;transform:none;transition:none}.guide-browse-nudge.is-pending{opacity:1;transform:none;visibility:visible}}
 @media(max-width:760px) and (prefers-reduced-motion:reduce){.topline{height:auto;min-height:34px}.topline-track{min-height:34px}.topline-message{height:auto;min-height:34px;white-space:normal;flex-wrap:wrap;gap:4px;line-height:1.35;padding:5px 12px;text-align:center}}
 
@@ -301,6 +314,26 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .hero-photo-stage .hero-photo.is-active{opacity:1}
 @media(prefers-reduced-motion:reduce){.hero-photo-stage .hero-photo{transition:none}}
 
+/* Orbiting circle motif: the disc masks the rings as they pulse inward. */
+.orbit-doodle{isolation:isolate;background:transparent}
+.orbit-doodle:before,.orbit-doodle:after{content:none}
+.orbit-doodle .orbit-doodle-ring{position:absolute;top:-9%;right:-9%;bottom:-9%;left:-9%;z-index:0;border:1px solid rgba(11,168,161,.42);border-radius:50%;pointer-events:none;transform:scale(1);animation:orbit-ring-pulse 8s cubic-bezier(.45,0,.55,1) infinite}
+.orbit-doodle .orbit-doodle-ring--outer{top:-16%;right:-16%;bottom:-16%;left:-16%;border-color:rgba(6,68,140,.2)}
+.orbit-doodle .orbit-doodle-disc{position:absolute;top:0;right:0;bottom:0;left:0;z-index:1;margin:auto;border-radius:50%;background:var(--yellow)}
+.catalog-doodle.orbit-doodle,.guide-feature-art.orbit-doodle{background:transparent}
+.catalog-doodle b{position:relative;z-index:2}
+/* A single star follows the yellow disc; the rings pulse behind it. */
+.orbit-doodle .orbit-star-track{position:absolute;inset:0;z-index:3;border-radius:50%;pointer-events:none;rotate:35deg;animation:orbit-star-turn 18s linear infinite}
+.orbit-doodle .orbit-star-track--disc{inset:0%}
+.orbit-doodle .orbit-star{position:absolute;top:0;left:50%;right:auto;bottom:auto;z-index:3;display:block;width:12%;height:12%;margin:-6% 0 0 -6%;color:var(--teal);font-size:0;animation:orbit-star-counter 18s linear infinite}
+.guide-feature-illustration{position:absolute;top:50%;left:50%;z-index:2;width:82%;height:auto;max-height:82%;object-fit:contain;transform:translate(-50%,-50%)}
+.catalog-doodle.orbit-doodle{flex:0 0 160px;align-self:center;min-height:160px}
+@keyframes orbit-ring-pulse{0%,100%{transform:scale(1)}50%{transform:scale(.58)}}
+@keyframes orbit-star-turn{from{rotate:35deg}to{rotate:395deg}}
+@keyframes orbit-star-counter{from{rotate:-35deg}to{rotate:-395deg}}
+@media(prefers-reduced-motion:reduce){.orbit-doodle-ring,.orbit-doodle .orbit-star-track,.orbit-doodle .orbit-star{animation:none}.orbit-doodle .orbit-star-track{rotate:35deg;scale:1}.orbit-doodle .orbit-star{rotate:-35deg}}
+@media(max-width:760px){.guide-feature-art.orbit-doodle{position:relative;grid-column:1/-1;justify-self:center;top:auto;right:auto;width:115px;height:115px;margin:18px 0 0;clip-path:none;opacity:1}}
+
 /* O-BEST spot illustrations: hand-drawn object studies, not emoji or stock icons. */
 .category-icon{border:0;border-radius:0;opacity:1;overflow:visible}
 
@@ -319,3 +352,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .hero-bottom-item img{width:29px;height:24px;object-fit:contain;flex:none}
 @media(max-width:760px){.hero-bottom{gap:clamp(7px,2.3vw,15px)}.hero-bottom-item{gap:4px;letter-spacing:.055em}.hero-bottom-item img{width:20px;height:18px}}
 @media(max-width:380px){.hero-bottom{gap:5px}.hero-bottom-item{gap:3px;letter-spacing:.025em}.hero-bottom-item img{width:17px;height:16px}}
+
+/* Keep below-the-fold content discoverable on phones even if scroll reveal is delayed. */
+@media(max-width:760px){.motion-ready main>section:not(.hero){opacity:1;transform:none}.header-cta{min-height:44px}.filter-chip,.catalog-brand-chips .filter-chip{height:44px}}

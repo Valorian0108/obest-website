@@ -1,6 +1,15 @@
 (() => {
-  const categoryNames = { power: "Power & charging", audio: "Audio", protection: "Phone protection", parts: "Phone parts", computing: "Computing", wearables: "Wearables", home: "Home & appliances" };
+  const categoryNames = { power: "Power & charging", audio: "Audio", parts: "Phone parts", computing: "Computing", wearables: "Wearables", home: "Home & appliances" };
   const itemTypeNames = { "power-banks": "Power banks", chargers: "Chargers", cables: "Cables", earbuds: "Earbuds", headphones: "Headphones", mice: "Mice", smartwatches: "Smartwatches", fans: "Fans", cookers: "Cookers", "vacuum-cleaners": "Vacuum cleaners", "phone-screens": "Phone screens", "power-flex": "Power/volume flexes" };
+  // Availability defaults are shop-approved display states; individual records can override the default.
+  const availabilityByItemType = Object.freeze({ "phone-screens": "available" });
+  const availabilityFor = product => product.availability || availabilityByItemType[product.itemType] || "check";
+  const availabilityMarkup = (product, detail = false) => {
+    const available = availabilityFor(product) === "available";
+    const status = available ? "Available" : detail ? "Ask us to check availability" : "Ask us to check";
+    const containerClass = detail ? "availability-pill" : "product-availability";
+    return `<span class="${containerClass}"><span class="availability-dot${available ? " availability-dot--available" : ""}" aria-hidden="true"></span>${detail ? status : `<span>${status}</span>`}</span>`;
+  };
   const iconMarkup = (type) => {
     const icons = {
       cable: '<path d="M31 9v8a8 8 0 0 0 16 0V9M35 9V5h8v4M19 33v6a8 8 0 0 0 16 0v-2"/><path d="M15 27h8v9h-8zM43 5h12v8H43z"/>',
@@ -28,9 +37,14 @@
     return `<svg viewBox="0 0 68 68" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${icons[type] || icons.case}</svg>`;
   };
   const cardArt = (product, index = 0) => `<div class="product-art product-art-${index % 4}${product.image ? " product-art--photo" : ""}" ${product.image ? "" : "aria-hidden=\"true\""}>${product.image ? `<img class="product-photo" src="${product.image}" alt="${product.imageAlt || (product.itemType === "power-flex" ? `Supplier reference photo of ${product.name}` : `${product.name} packaging and product`)}" loading="lazy" />` : `<span class="product-art-stamp">O-BEST / ${String(index + 1).padStart(2, "0")}</span><div class="product-object object-${product.icon}">${iconMarkup(product.icon)}</div><span class="art-spark spark-icon" aria-hidden="true"></span>`}</div>`;
-  const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="product.html?id=${encodeURIComponent(product.id)}" aria-label="View item details for ${product.name}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${itemTypeNames[product.itemType] || product.categoryName}</p><h2>${product.name}</h2><p class="product-card-description">${product.description}</p><div class="product-card-bottom"><span class="product-availability"><span class="availability-dot"></span><span>Ask us to check</span></span><span class="card-action-cue">View item details</span></div></div></a></article>`;
+  const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="product.html?id=${encodeURIComponent(product.id)}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${itemTypeNames[product.itemType] || product.categoryName}</p><h2>${product.name}</h2><p class="product-card-description">${product.description}</p><div class="product-card-bottom">${availabilityMarkup(product)}<span class="card-action-cue" aria-hidden="true">View item details</span></div></div></a></article>`;
 
   document.querySelectorAll("[data-year]").forEach(el => el.textContent = new Date().getFullYear());
+  const currentPath = location.pathname === "/" ? "/index.html" : location.pathname;
+  document.querySelectorAll(".main-nav a").forEach(link => {
+    if (new URL(link.href, location.href).pathname === currentPath) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const prefersReducedMotion = reducedMotionQuery.matches;
   const heroCarousel = document.querySelector("[data-hero-carousel]");
@@ -156,6 +170,7 @@
   if (grid && categoryGrid) {
     const search = document.getElementById("product-search");
     const backButton = document.getElementById("category-back");
+    const brandFilter = document.getElementById("brand-filter");
     const resultCount = document.getElementById("result-count");
     const emptyResults = document.getElementById("empty-results");
     const normalizeSearch = value => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
@@ -179,38 +194,59 @@
       { id: "computing", name: "Computing", description: "Mice and everyday computer accessories", icon: "mouse", types: ["mice"] },
       { id: "wearables", name: "Wearables", description: "Smartwatches and wearable tech", icon: "watch", types: ["smartwatches"] },
       { id: "home", name: "Home & appliances", description: "Fans and practical home appliances", icon: "fan", types: ["fans", "cookers", "vacuum-cleaners"] },
-      { id: "protection", name: "Phone protection", description: "Cases and screen protectors", icon: "case", types: ["cases", "screen-protectors"] },
-      { id: "parts", name: "Phone parts", description: "Screens, batteries and repair parts", icon: "screenpart", types: ["phone-screens", "phone-batteries", "sub-boards", "power-flex", "charging-ports"] }
+      { id: "parts", name: "Phone parts", description: "Screens and phone repair parts", icon: "screenpart", types: ["phone-screens", "power-flex"] }
     ];
-    const typeIcons = { "power-banks": "bank", chargers: "charger", cables: "cable", earbuds: "earbuds", headphones: "headphones", mice: "mouse", smartwatches: "watch", fans: "fan", cookers: "cooker", "vacuum-cleaners": "vacuum", cases: "case", "screen-protectors": "screen", "phone-screens": "screenpart", "phone-batteries": "battery", "sub-boards": "board", "power-flex": "flex", "charging-ports": "port" };
-    let activeCategory = new URLSearchParams(location.search).get("category");
-    if (!categoryNames[activeCategory]) activeCategory = "";
-    let activeItemType = new URLSearchParams(location.search).get("type") || "";
+    const typeIcons = { "power-banks": "bank", chargers: "charger", cables: "cable", earbuds: "earbuds", headphones: "headphones", mice: "mouse", smartwatches: "watch", fans: "fan", cookers: "cooker", "vacuum-cleaners": "vacuum", "phone-screens": "screenpart", "power-flex": "flex" };
     // Batch 1 is approved; batch 2 is now open for the next owner review.
     const products = (window.OBEST_PRODUCTS || []).filter(product => product.batch <= 2);
+    const brandSlug = brand => normalizeSearch(brand || "Other").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "other";
+    const phoneScreenProducts = products.filter(product => product.itemType === "phone-screens");
+    const phoneScreenBrands = [...new Map(phoneScreenProducts.map(product => [brandSlug(product.brand), product.brand || "Other"]))]
+      .map(([slug, name]) => ({ slug, name, count: phoneScreenProducts.filter(product => brandSlug(product.brand) === slug).length }))
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+    const availableCategories = catalogCategories.filter(category => products.some(product => product.category === category.id));
+    const availableTypes = category => category.types.filter(type => products.some(product => product.category === category.id && product.itemType === type));
+    const params = new URLSearchParams(location.search);
+    const requestedCategory = params.get("category") || "";
+    const requestedType = params.get("type") || "";
+    const requestedBrand = params.get("brand") || "";
+    let activeCategory = availableCategories.some(category => category.id === requestedCategory) ? requestedCategory : "";
+    let activeItemType = activeCategory && availableTypes(availableCategories.find(category => category.id === activeCategory)).includes(requestedType) ? requestedType : "";
+    let activeBrand = activeItemType === "phone-screens" && phoneScreenBrands.some(brand => brand.slug === requestedBrand) ? requestedBrand : "";
+    const catalogUrl = (category, type = "", brand = "") => {
+      const query = new URLSearchParams();
+      if (category) query.set("category", category);
+      if (type) query.set("type", type);
+      if (brand) query.set("brand", brand);
+      const searchString = query.toString();
+      return searchString ? `?${searchString}` : location.pathname;
+    };
+    if ((requestedCategory && !activeCategory) || (requestedType && !activeItemType) || (requestedBrand && !activeBrand)) {
+      history.replaceState(null, "", catalogUrl(activeCategory, activeItemType));
+    }
     const renderCategories = () => {
       const term = normalizeSearch(search?.value || "");
       const matchingProducts = products.filter(product => productMatchesSearch(product, term));
       if (activeCategory) {
-        const category = catalogCategories.find(item => item.id === activeCategory);
-        const shownTypes = category.types.filter(type => {
+        const category = availableCategories.find(item => item.id === activeCategory);
+        const shownTypes = availableTypes(category).filter(type => {
           const knownName = itemTypeNames[type] || type.replaceAll("-", " ").replace(/\b\w/g, letter => letter.toUpperCase());
-          return !term || `${knownName} ${category.name} ${category.description}`.toLowerCase().includes(term) || matchingProducts.some(product => product.itemType === type && `${product.name} ${product.description}`.toLowerCase().includes(term));
+          return !term || normalizeSearch(`${knownName} ${category.name} ${category.description}`).includes(term) || matchingProducts.some(product => product.category === category.id && product.itemType === type);
         });
         categoryGrid.innerHTML = shownTypes.length ? `<div class="catalog-category-group"><div class="catalog-category-heading"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${category.name}</p><h2>Choose what you need.</h2><p>${category.description}</p></div><div class="catalog-category-options">${shownTypes.map(type => {
           const count = products.filter(product => product.category === category.id && product.itemType === type).length;
           const label = itemTypeNames[type] || type.replaceAll("-", " ").replace(/\b\w/g, letter => letter.toUpperCase());
-          return `<button class="catalog-category-card catalog-subcategory-card" type="button" data-category="${category.id}" data-type="${type}"><span class="catalog-category-icon">${iconMarkup(typeIcons[type])}</span><span class="catalog-category-copy"><strong>${label}</strong><small>${count ? `${count} product${count === 1 ? "" : "s"}` : "Ask us about options"}</small><small class="card-action-cue">See options</small></span></button>`;
+          return `<button class="catalog-category-card catalog-subcategory-card" type="button" data-category="${category.id}" data-type="${type}"><span class="catalog-category-icon">${iconMarkup(typeIcons[type])}</span><span class="catalog-category-copy"><strong>${label}</strong><small>${count} product${count === 1 ? "" : "s"}</small><small class="card-action-cue">See options</small></span></button>`;
         }).join("")}</div></div>` : "";
       } else {
-        const shownCategories = catalogCategories.filter(category => (!term || `${category.name} ${category.description}`.toLowerCase().includes(term) || matchingProducts.some(product => product.category === category.id && `${product.name} ${product.description}`.toLowerCase().includes(term))));
-        categoryGrid.innerHTML = shownCategories.map(category => `<section class="catalog-category-group"><div class="catalog-category-heading"><h2>${category.name}</h2><p>${category.description}</p></div><div class="catalog-category-options">${category.types.filter(type => {
+        const shownCategories = availableCategories.filter(category => (!term || normalizeSearch(`${category.name} ${category.description}`).includes(term) || matchingProducts.some(product => product.category === category.id)));
+        categoryGrid.innerHTML = shownCategories.map(category => `<section class="catalog-category-group"><div class="catalog-category-heading"><h2>${category.name}</h2><p>${category.description}</p></div><div class="catalog-category-options">${availableTypes(category).filter(type => {
           const label = itemTypeNames[type] || type.replaceAll("-", " ").replace(/\b\w/g, letter => letter.toUpperCase());
-          return !term || `${label} ${category.name} ${category.description}`.toLowerCase().includes(term) || matchingProducts.some(product => product.category === category.id && product.itemType === type && `${product.name} ${product.description}`.toLowerCase().includes(term));
+          return !term || normalizeSearch(`${label} ${category.name} ${category.description}`).includes(term) || matchingProducts.some(product => product.category === category.id && product.itemType === type);
         }).map(type => {
           const label = itemTypeNames[type] || type.replaceAll("-", " ").replace(/\b\w/g, letter => letter.toUpperCase());
           const count = products.filter(product => product.category === category.id && product.itemType === type).length;
-          return `<button class="catalog-category-card catalog-subcategory-card" type="button" data-category="${category.id}" data-type="${type}"><span class="catalog-category-icon">${iconMarkup(typeIcons[type])}</span><span class="catalog-category-copy"><strong>${label}</strong><small>${count ? `${count} product${count === 1 ? "" : "s"}` : "Ask us about options"}</small><small class="card-action-cue">See options</small></span></button>`;
+          return `<button class="catalog-category-card catalog-subcategory-card" type="button" data-category="${category.id}" data-type="${type}"><span class="catalog-category-icon">${iconMarkup(typeIcons[type])}</span><span class="catalog-category-copy"><strong>${label}</strong><small>${count} product${count === 1 ? "" : "s"}</small><small class="card-action-cue">See options</small></span></button>`;
         }).join("")}</div></section>`).join("");
       }
       categoryGrid.hidden = false;
@@ -218,24 +254,34 @@
       observeReveal(categoryGrid);
       backButton.hidden = !activeCategory;
       backButton.textContent = "All categories";
-      resultCount.textContent = activeCategory ? catalogCategories.find(item => item.id === activeCategory).name : term ? "Matching categories" : "Browse a category";
+      resultCount.textContent = activeCategory ? availableCategories.find(item => item.id === activeCategory).name : term ? "Matching categories" : "Browse a category";
       emptyResults.hidden = categoryGrid.innerHTML !== "";
     };
     const renderProducts = (term = "") => {
-      const items = products.filter(product => {
+      const matchingItems = products.filter(product => {
         const inSelectedCategory = !activeCategory || product.category === activeCategory;
         const inSelectedType = !activeItemType || product.itemType === activeItemType;
-        return inSelectedCategory && inSelectedType && (!term || productMatchesSearch(product, term));
+        const inSelectedBrand = !activeBrand || brandSlug(product.brand) === activeBrand;
+        return inSelectedCategory && inSelectedType && inSelectedBrand && (!term || productMatchesSearch(product, term));
       });
+      const items = activeItemType === "phone-screens"
+        ? matchingItems.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true }))
+        : matchingItems;
+      const showBrandFilter = activeCategory === "parts" && activeItemType === "phone-screens";
+      brandFilter.hidden = !showBrandFilter;
+      if (showBrandFilter) {
+        brandFilter.innerHTML = `<span class="catalog-brand-filter-label">Filter by brand</span><div class="catalog-brand-chips"><button class="filter-chip${activeBrand ? "" : " active"}" type="button" data-brand="" aria-pressed="${!activeBrand}">All brands <span>${phoneScreenProducts.length}</span></button>${phoneScreenBrands.map(brand => `<button class="filter-chip${activeBrand === brand.slug ? " active" : ""}" type="button" data-brand="${brand.slug}" aria-pressed="${activeBrand === brand.slug}">${brand.name} <span>${brand.count}</span></button>`).join("")}</div>`;
+      }
       grid.innerHTML = items.map(productCard).join("");
       categoryGrid.hidden = true;
       grid.hidden = false;
       observeReveal(grid);
       backButton.hidden = !term && !activeCategory;
-      backButton.textContent = term ? "Clear search" : activeItemType ? categoryNames[activeCategory] : "All categories";
+      backButton.textContent = term ? "Clear search" : activeBrand ? "All phone screens" : activeItemType ? categoryNames[activeCategory] : "All categories";
+      backButton.hidden = !term && !activeBrand && !activeItemType;
       resultCount.textContent = term
         ? `${items.length} matching ${items.length === 1 ? "product" : "products"}`
-        : `${items.length} ${items.length === 1 ? "product" : "products"} in ${activeItemType ? itemTypeNames[activeItemType] : categoryNames[activeCategory]}`;
+        : `${items.length} ${items.length === 1 ? "product" : "products"}${showBrandFilter ? ` in ${activeBrand ? `${phoneScreenBrands.find(brand => brand.slug === activeBrand)?.name} ` : ""}phone screens` : ` in ${activeItemType ? itemTypeNames[activeItemType] : categoryNames[activeCategory]}`}`;
       emptyResults.hidden = items.length !== 0;
     };
     const render = () => {
@@ -247,7 +293,8 @@
     const openCategory = (category, type = "") => {
       activeCategory = category;
       activeItemType = type;
-      history.replaceState(null, "", `?category=${encodeURIComponent(category)}${type ? `&type=${encodeURIComponent(type)}` : ""}`);
+      activeBrand = "";
+      history.replaceState(null, "", catalogUrl(category, type));
       render();
       document.querySelector(".catalog-tools")?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
@@ -255,12 +302,22 @@
       const button = event.target.closest("[data-category]");
       if (button) openCategory(button.dataset.category, button.dataset.type || "");
     });
+    brandFilter.addEventListener("click", event => {
+      const button = event.target.closest("[data-brand]");
+      if (!button) return;
+      activeBrand = button.dataset.brand;
+      history.replaceState(null, "", catalogUrl(activeCategory, activeItemType, activeBrand));
+      render();
+    });
     backButton.addEventListener("click", () => {
       if (search?.value.trim()) {
         search.value = "";
+      } else if (activeBrand) {
+        activeBrand = "";
+        history.replaceState(null, "", catalogUrl(activeCategory, activeItemType));
       } else if (activeItemType) {
         activeItemType = "";
-        history.replaceState(null, "", `?category=${encodeURIComponent(activeCategory)}`);
+        history.replaceState(null, "", catalogUrl(activeCategory));
       } else {
         activeCategory = "";
         history.replaceState(null, "", location.pathname);
@@ -280,11 +337,14 @@
     } else {
       document.title = `${product.name} | O-BEST`;
       const descriptionMeta = document.querySelector('meta[name="description"]');
-      if (descriptionMeta) descriptionMeta.content = `${product.description} Ask O-BEST to check current availability.`;
+      const availability = availabilityFor(product);
+      if (descriptionMeta) descriptionMeta.content = availability === "available"
+        ? `${product.description} Listed as available; confirm the exact model fit and current stock with O-BEST.`
+        : `${product.description} Ask O-BEST to check current availability.`;
       const specs = [product.brand && ["Brand", product.brand], product.model && ["Model", product.model], product.capacity && ["Capacity", product.capacity], product.output && ["Output", product.output], product.details && ["Details", product.details]].filter(Boolean);
       const specsMarkup = specs.length ? `<dl class="detail-specs">${specs.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>` : "";
        const photoSourceMarkup = product.photoSource ? `<p class="detail-photo-source">Supplier reference photo · <a href="${product.photoSource}" target="_blank" rel="noopener noreferrer">view source listing</a>. Confirm the exact part revision and compatibility with the seller.</p>` : "";
-       detail.innerHTML = `<div class="detail-art-wrap">${cardArt(product, 1)}${product.image ? "" : "<span class=\"detail-art-note\">PHOTO<br />TO ADD</span>"}</div><div class="detail-copy"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${product.categoryName}</p><h1>${product.name}</h1><p class="availability-pill"><span class="availability-dot"></span> Ask us to check availability</p><p class="detail-description">${product.description}</p>${photoSourceMarkup}${specsMarkup}<div class="detail-note"><span class="spark-icon" aria-hidden="true"></span><p>Need help checking compatibility? Send us your device model and ask us about this item.</p></div><a class="button button-yellow" href="request.html?item=${encodeURIComponent(product.name)}">Ask about this item </a><a class="text-link detail-back" href="catalog.html">Back to all products</a></div>`;
+        detail.innerHTML = `<div class="detail-art-wrap">${cardArt(product, 1)}${product.image ? "" : "<span class=\"detail-art-note\">PHOTO<br />TO ADD</span>"}</div><div class="detail-copy"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${product.categoryName}</p><h1>${product.name}</h1>${availabilityMarkup(product, true)}<p class="detail-description">${product.description}</p>${photoSourceMarkup}${specsMarkup}<div class="detail-note"><span class="spark-icon" aria-hidden="true"></span><p>Need help checking compatibility? Send us your device model and ask us about this item.</p></div><a class="button button-yellow" href="request.html?item=${encodeURIComponent(product.name)}">Ask about this item </a><a class="text-link detail-back" href="catalog.html">Back to all products</a></div>`;
     }
   }
 
