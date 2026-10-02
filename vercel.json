@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    {
+      "source": "/product/:id",
+      "destination": "/product.html?id=:id"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

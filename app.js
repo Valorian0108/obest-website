@@ -37,7 +37,7 @@
     return `<svg viewBox="0 0 68 68" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${icons[type] || icons.case}</svg>`;
   };
   const cardArt = (product, index = 0) => `<div class="product-art product-art-${index % 4}${product.image ? " product-art--photo" : ""}" ${product.image ? "" : "aria-hidden=\"true\""}>${product.image ? `<img class="product-photo" src="${product.image}" alt="${product.imageAlt || (product.itemType === "power-flex" ? `Supplier reference photo of ${product.name}` : `${product.name} packaging and product`)}" loading="lazy" />` : `<span class="product-art-stamp">O-BEST / ${String(index + 1).padStart(2, "0")}</span><div class="product-object object-${product.icon}">${iconMarkup(product.icon)}</div><span class="art-spark spark-icon" aria-hidden="true"></span>`}</div>`;
-  const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="product.html?id=${encodeURIComponent(product.id)}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${itemTypeNames[product.itemType] || product.categoryName}</p><h2>${product.name}</h2><p class="product-card-description">${product.description}</p><div class="product-card-bottom">${availabilityMarkup(product)}<span class="card-action-cue" aria-hidden="true">View item details</span></div></div></a></article>`;
+  const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="/product/${encodeURIComponent(product.id)}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${itemTypeNames[product.itemType] || product.categoryName}</p><h2>${product.name}</h2><p class="product-card-description">${product.description}</p><div class="product-card-bottom">${availabilityMarkup(product)}<span class="card-action-cue" aria-hidden="true">View item details</span></div></div></a></article>`;
 
   document.querySelectorAll("[data-year]").forEach(el => el.textContent = new Date().getFullYear());
   const currentPath = location.pathname === "/" ? "/index.html" : location.pathname;
@@ -330,7 +330,15 @@
 
   const detail = document.getElementById("product-detail");
   if (detail) {
-    const id = new URLSearchParams(location.search).get("id");
+    const pathMatch = location.pathname.match(/^\/product\/([^/]+)\/?$/);
+    let id = new URLSearchParams(location.search).get("id");
+    if (pathMatch) {
+      try {
+        id = decodeURIComponent(pathMatch[1]);
+      } catch {
+        id = "";
+      }
+    }
     const product = (window.OBEST_PRODUCTS || []).find(p => p.id === id);
     if (!product) {
       detail.innerHTML = `<div class="not-found"><span class="spark-icon" aria-hidden="true"></span><h1>That item isn’t here yet.</h1><p>Explore the catalogue or tell us what you’re looking for.</p><a class="button button-blue" href="catalog.html">Browse catalogue </a></div>`;

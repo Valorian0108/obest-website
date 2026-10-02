@@ -36,6 +36,18 @@ test("home and catalogue only link to categories and product types with listings
   assert.ok(configuredTypes.every(type => listedProducts.some(product => product.itemType === type)), "empty item types should not appear in the catalogue taxonomy");
 });
 
+test("product cards use clean URLs while the detail page keeps legacy links working", () => {
+  const root = path.resolve(__dirname, "..");
+  const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const vercel = JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
+  const productRewrite = vercel.rewrites.find(rule => rule.source === "/product/:id");
+
+  assert.match(app, /href="\/product\/\$\{encodeURIComponent\(product\.id\)\}"/);
+  assert.ok(app.includes('const pathMatch = location.pathname.match(/^\\/product\\/([^/]+)\\/?$/);'));
+  assert.match(app, /new URLSearchParams\(location\.search\)\.get\("id"\)/, "existing ?id=product-id URLs should remain supported");
+  assert.equal(productRewrite?.destination, "/product.html?id=:id");
+});
+
 test("the owner-approved charging checklist is presented as available general guidance", () => {
   const root = path.resolve(__dirname, "..");
   const guides = fs.readFileSync(path.join(root, "guides.html"), "utf8");
