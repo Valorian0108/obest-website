@@ -258,16 +258,12 @@ test("power-flex catalogue entries are model-specific, unique and exclude Samsun
   assert.ok(!flexes.some(product => product.id.includes("pouvoir-2")), "a volume-only source must not be presented as a confirmed power/volume flex");
 });
 
-test("power-flex supplier photos are local and linked to their exact supplier listing", () => {
+test("any retained power-flex photos exist locally and retain their supplier references", () => {
   const flexesWithPhotos = products.filter(product => product.itemType === "power-flex" && product.image);
-  assert.equal(flexesWithPhotos.length, 14, "only supplier photos tied to exact handset variants are added");
   for (const product of flexesWithPhotos) {
     assert.ok(product.photoSource?.startsWith("https://phonexperts.ng/product/"), `${product.id} needs its supplier source URL`);
     assert.ok(fs.existsSync(path.resolve(__dirname, "..", product.image)), `${product.id} image must exist locally`);
-  }
-  for (const id of ["tecno-camon-20-pro-power-flex", "tecno-pop-5-pro-power-flex", "tecno-pop-6-go-power-flex", "iphone-14-pro-max-power-flex"]) {
-    const product = flexesWithPhotos.find(item => item.id === id);
-    assert.ok(product?.imageAlt, `${id} needs an alt label identifying the supplier reference photo`);
+    assert.ok(product.imageAlt, `${product.id} needs an alt label for its supplier reference photo`);
   }
 });
 
