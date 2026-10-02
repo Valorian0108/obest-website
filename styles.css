@@ -27,10 +27,10 @@
 @media(max-width:420px){.catalog-category-options{grid-template-columns:1fr}.catalog-category-card{min-height:68px}.product-card-copy{min-height:160px}}
 
 /* Product photos stay uncropped and get enough height for package specifications to remain legible. */
-.product-art--photo{height:300px;background:#fff}
+.product-art--photo{height:300px;background:#fff;contain:layout paint}
 .product-art--photo:before{display:none}
 .product-photo{display:block;position:relative;z-index:1;width:100%;height:100%;padding:14px;object-fit:contain;object-position:center;mix-blend-mode:normal;background:#fff}
-.detail-art-wrap .product-art--photo{height:560px;background:#fff}
+.detail-art-wrap .product-art--photo{height:560px;aspect-ratio:1/1;background:#fff}
 .detail-art-wrap .product-photo{padding:24px}
 @media(max-width:760px){.product-art--photo{height:250px}.detail-art-wrap .product-art--photo{height:460px}}
 .request-form .form-trap{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
@@ -310,10 +310,58 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .about-location address a{display:inline-block;margin-top:7px;color:var(--blue);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
 .about-location address a:hover{text-decoration-thickness:2px}
 
-/* Three-image homepage carousel: edge-to-edge source photos; no added card, mat, labels, or crop. */
-.hero-photo-stage .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;opacity:0;transition:opacity 1500ms cubic-bezier(.4,0,.2,1)}
+/* One steady homepage image; visitors may browse the remaining supplied photos. */
+.hero-photo-stage .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;opacity:0;transition:opacity 220ms ease}
 .hero-photo-stage .hero-photo.is-active{opacity:1}
-@media(prefers-reduced-motion:reduce){.hero-photo-stage .hero-photo{transition:none}}
+.hero-photo-frame{aspect-ratio:auto}
+.hero-photo-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px 0;color:#dce8f4;font:700 10px/1 var(--font-body);letter-spacing:.06em}
+.hero-photo-control{min-height:36px;padding:7px 9px;display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);color:#fff;cursor:pointer;transition:background-color .18s,border-color .18s}
+.hero-photo-control:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.6)}
+.hero-photo-control:focus-visible{outline:2px solid var(--yellow);outline-offset:3px}
+.hero-photo-count{font-variant-numeric:tabular-nums;letter-spacing:.14em;color:#fff}
+@media(max-width:760px){.hero-photo-controls{padding-top:9px}.hero-photo-control{min-height:40px}}
+@media(prefers-reduced-motion:reduce){.hero-photo-stage .hero-photo{transition:none}.hero-photo-control{transition:none}}
+
+/* The homepage category links use editorial spans instead of six equal tiles. */
+.category-section{padding-top:96px;padding-bottom:100px}
+.category-section .section-heading{margin-bottom:34px}
+.category-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.category-grid>.category-card{min-height:212px;grid-column:span 4}
+.category-grid>.category-card:nth-child(1){grid-column:span 7;min-height:248px}
+.category-grid>.category-card:nth-child(2){grid-column:span 5;min-height:248px}
+.category-grid>.category-card:nth-child(3){grid-column:span 5}
+.category-grid>.category-card:nth-child(4){grid-column:span 7}
+.category-grid>.category-card:nth-child(5){grid-column:span 4}
+.category-grid>.category-card:nth-child(6){grid-column:span 8}
+.category-card{padding:22px 23px 23px}
+.category-card:after{width:190px;height:190px;right:-58px;top:34px;transition:transform .35s ease,opacity .35s ease}
+.category-card:hover:after,.category-card:focus-visible:after{transform:scale(1.08);opacity:.2}
+.category-grid>.category-card:nth-child(1) .category-icon,.category-grid>.category-card:nth-child(2) .category-icon{width:88px;height:88px;right:26px;top:58px}
+.category-icon img{width:62px;height:52px}
+.category-card-copy{gap:13px}
+.category-card-copy strong{font-size:clamp(21px,2.2vw,29px);line-height:1.02;letter-spacing:-.055em}
+.category-index{font-size:9px}
+.category-card-copy .card-action-cue{font-size:10px}
+@media(max-width:760px){
+  .category-section{padding:68px 22px 76px}
+  .category-section .section-heading{margin-bottom:22px}
+  .category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .category-grid>.category-card,.category-grid>.category-card:nth-child(n){grid-column:auto;min-height:174px;padding:16px 14px}
+  .category-grid>.category-card:nth-child(1),.category-grid>.category-card:nth-child(4){grid-column:1/-1;min-height:168px}
+  .category-icon,.category-grid>.category-card:nth-child(1) .category-icon,.category-grid>.category-card:nth-child(2) .category-icon{width:58px;height:50px;right:13px;top:45px}
+  .category-icon img{width:50px;height:42px}
+  .category-card-copy strong{font-size:clamp(17px,5.2vw,23px)}
+  .category-grid>.category-card:nth-child(1) .category-card-copy strong,.category-grid>.category-card:nth-child(4) .category-card-copy strong{font-size:clamp(22px,6vw,28px)}
+  .category-grid>.category-card .category-card-copy .card-action-cue{font-size:9px;padding:4px 6px}
+}
+@media(max-width:360px){.category-grid{gap:8px}.category-grid>.category-card,.category-grid>.category-card:nth-child(n){min-height:158px;padding:13px 11px}.category-grid>.category-card:nth-child(1),.category-grid>.category-card:nth-child(4){min-height:150px}.category-index{font-size:8px;letter-spacing:.1em}.category-card-copy strong{font-size:17px}}
+
+/* Research photos share a neutral field and identify their source status in-card. */
+.product-art--research{background:#f2f4f3;border:1px solid #e1e6e4}
+.product-art--research .product-photo{padding:22px;background:#f2f4f3;mix-blend-mode:multiply}
+.research-photo-label{position:absolute;left:12px;bottom:12px;z-index:2;padding:7px 9px;background:rgba(255,255,255,.94);border:1px solid #d7e0dd;color:#425c66;font:800 9px/1.2 var(--font-body);letter-spacing:.035em}
+.detail-art-wrap .research-photo-label{left:16px;bottom:16px;padding:9px 11px;font-size:10px}
+@media(max-width:760px){.product-art--research .product-photo{padding:16px}.research-photo-label{left:8px;bottom:8px;padding:6px 7px;font-size:8px}.detail-art-wrap .research-photo-label{left:12px;bottom:12px}}
 
 /* Orbiting circle motif: the disc masks the rings as they pulse inward. */
 .orbit-doodle{isolation:isolate;background:transparent}

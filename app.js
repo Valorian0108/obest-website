@@ -58,12 +58,14 @@
     return `<svg viewBox="0 0 68 68" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${icons[type] || icons.case}</svg>`;
   };
   const cardArt = (product, index = 0) => {
-    const image = safeWebUrl(product.image);
+    const image = safeWebUrl(product.image) || (product.itemType === "phone-screens" ? safeWebUrl(product.researchImage) : "");
     const icon = typeof product.icon === "string" ? product.icon.replace(/[^a-z0-9-]/gi, "") : "case";
-    const alt = product.imageAlt || (product.itemType === "power-flex" ? `Supplier reference photo of ${product.name}` : `${product.name} packaging and product`);
-    return `<div class="product-art product-art-${index % 4}${image ? " product-art--photo" : ""}" ${image ? "" : "aria-hidden=\"true\""}>${image ? `<img class="product-photo" src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" loading="lazy" />` : `<span class="product-art-stamp">O-BEST / ${String(index + 1).padStart(2, "0")}</span><div class="product-object object-${escapeHtml(icon)}">${iconMarkup(icon)}</div><span class="art-spark spark-icon" aria-hidden="true"></span>`}</div>`;
+    const alt = product.imageAlt || (product.itemType === "phone-screens" || product.itemType === "power-flex" ? `Supplier reference photo of ${product.name}` : `${product.name} packaging and product`);
+    const researchClass = product.researchListing ? " product-art--research" : "";
+    const researchLabel = product.researchListing ? "<span class=\"research-photo-label\">Supplier photo · unverified</span>" : "";
+    return `<div class="product-art product-art-${index % 4}${image ? " product-art--photo" : ""}${researchClass}" ${image ? "" : "aria-hidden=\"true\""}>${image ? `<img class="product-photo" src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" width="800" height="800" loading="lazy" decoding="async" />${researchLabel}` : `<span class="product-art-stamp">O-BEST / ${String(index + 1).padStart(2, "0")}</span><div class="product-object object-${escapeHtml(icon)}">${iconMarkup(icon)}</div><span class="art-spark spark-icon" aria-hidden="true"></span>`}</div>`;
   };
-  const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="/product/${encodeURIComponent(product.id)}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${escapeHtml(itemTypeNames[product.itemType] || product.categoryName)}</p><h2>${escapeHtml(product.name)}</h2><p class="product-card-description">${escapeHtml(product.description)}</p><div class="product-card-bottom">${availabilityMarkup(product)}<span class="card-action-cue" aria-hidden="true">View item details</span></div></div></a></article>`;
+  const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="/product/${encodeURIComponent(product.id)}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${escapeHtml(itemTypeNames[product.itemType] || product.categoryName)}${product.researchListing ? " · Supplier research" : ""}</p><h2>${escapeHtml(product.name)}</h2><p class="product-card-description">${escapeHtml(product.description)}</p><div class="product-card-bottom">${availabilityMarkup(product)}<span class="card-action-cue" aria-hidden="true">View item details</span></div></div></a></article>`;
 
   document.querySelectorAll("[data-year]").forEach(el => el.textContent = new Date().getFullYear());
   const currentPath = location.pathname === "/" ? "/index.html" : location.pathname;
@@ -73,12 +75,22 @@
   });
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const prefersReducedMotion = reducedMotionQuery.matches;
-  const heroCarousel = document.querySelector("[data-hero-carousel]");
-  if (heroCarousel) {
-    const slides = [...heroCarousel.querySelectorAll(".hero-photo")];
+  const heroGallery = document.querySelector("[data-hero-gallery]");
+  if (heroGallery) {
+    const slides = [...heroGallery.querySelectorAll(".hero-photo")];
+    const previousButton = document.querySelector("[data-gallery-previous]");
+    const nextButton = document.querySelector("[data-gallery-next]");
+    const count = document.querySelector("[data-gallery-count]");
     let activeSlide = 0;
-    let intervalId = null;
-    let isInView = true;
+
+    const loadSlide = slide => {
+      if (slide.dataset.loaded === "true") return slide.decode ? slide.decode().catch(() => null) : Promise.resolve();
+      if (slide.dataset.srcset) slide.srcset = slide.dataset.srcset;
+      if (slide.dataset.sizes) slide.sizes = slide.dataset.sizes;
+      if (slide.dataset.src) slide.src = slide.dataset.src;
+      slide.dataset.loaded = "true";
+      return slide.decode ? slide.decode().catch(() => null) : Promise.resolve();
+    };
 
     const showSlide = index => {
       slides.forEach((slide, slideIndex) => {
@@ -87,32 +99,12 @@
         slide.setAttribute("aria-hidden", String(!isActive));
       });
       activeSlide = index;
+      if (count) count.textContent = `${String(index + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+      loadSlide(slides[index]);
     };
-    const stopCarousel = () => {
-      if (intervalId === null) return;
-      window.clearInterval(intervalId);
-      intervalId = null;
-    };
-    const startCarousel = () => {
-      if (intervalId !== null || reducedMotionQuery.matches || document.hidden || !isInView || slides.length < 2) return;
-      intervalId = window.setInterval(() => showSlide((activeSlide + 1) % slides.length), 3500);
-    };
-
-    if ("IntersectionObserver" in window) {
-      const carouselObserver = new IntersectionObserver(entries => {
-        isInView = entries.some(entry => entry.isIntersecting);
-        if (isInView) startCarousel();
-        else stopCarousel();
-      }, { threshold: 0.15 });
-      carouselObserver.observe(heroCarousel);
-    }
-    document.addEventListener("visibilitychange", () => document.hidden ? stopCarousel() : startCarousel());
-    reducedMotionQuery.addEventListener?.("change", event => event.matches ? stopCarousel() : startCarousel());
-
-    Promise.all(slides.map(slide => slide.decode ? slide.decode().catch(() => null) : Promise.resolve()))
-      .then(() => {
-        if (slides.every(slide => slide.complete && slide.naturalWidth > 0)) startCarousel();
-      });
+    previousButton?.addEventListener("click", () => showSlide((activeSlide - 1 + slides.length) % slides.length));
+    nextButton?.addEventListener("click", () => showSlide((activeSlide + 1) % slides.length));
+    loadSlide(slides[activeSlide]);
   }
   const ticker = document.querySelector(".topline");
   const tickerToggle = ticker?.querySelector(".topline-toggle");
@@ -223,6 +215,7 @@
       ];
       return normalizeSearch(searchableFields.filter(Boolean).join(" ")).includes(term);
     };
+    let detachCatalogListeners = () => {};
     const catalogCategories = [
       { id: "power", name: "Power & charging", description: "Power banks, chargers and cables", icon: "charger", types: ["power-banks", "chargers", "cables"] },
       { id: "audio", name: "Audio & listening", description: "Earbuds and headphones", icon: "headphones", types: ["earbuds", "headphones"] },
@@ -234,6 +227,7 @@
     const typeIcons = { "power-banks": "bank", chargers: "charger", cables: "cable", earbuds: "earbuds", headphones: "headphones", mice: "mouse", smartwatches: "watch", fans: "fan", cookers: "cooker", "vacuum-cleaners": "vacuum", "phone-screens": "screenpart", "power-flex": "flex" };
     // Batch 1 is approved; batch 2 is now open for the next owner review.
     const startCatalog = catalogueProducts => {
+    detachCatalogListeners();
     const products = (catalogueProducts || []).filter(product => product && typeof product.id === "string" && typeof product.name === "string");
     const brandSlug = brand => normalizeSearch(brand || "Other").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "other";
     const phoneScreenProducts = products.filter(product => product.itemType === "phone-screens");
@@ -334,18 +328,18 @@
       render();
       document.querySelector(".catalog-tools")?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    categoryGrid.addEventListener("click", event => {
+    const onCategoryClick = event => {
       const button = event.target.closest("[data-category]");
       if (button) openCategory(button.dataset.category, button.dataset.type || "");
-    });
-    brandFilter.addEventListener("click", event => {
+    };
+    const onBrandClick = event => {
       const button = event.target.closest("[data-brand]");
       if (!button) return;
       activeBrand = button.dataset.brand;
       history.replaceState(null, "", catalogUrl(activeCategory, activeItemType, activeBrand));
       render();
-    });
-    backButton.addEventListener("click", () => {
+    };
+    const onBackClick = () => {
       if (search?.value.trim()) {
         search.value = "";
       } else if (activeBrand) {
@@ -359,18 +353,26 @@
         history.replaceState(null, "", location.pathname);
       }
       render();
-    });
+    };
+    categoryGrid.addEventListener("click", onCategoryClick);
+    brandFilter.addEventListener("click", onBrandClick);
+    backButton.addEventListener("click", onBackClick);
     search?.addEventListener("input", render);
+    detachCatalogListeners = () => {
+      categoryGrid.removeEventListener("click", onCategoryClick);
+      brandFilter.removeEventListener("click", onBrandClick);
+      backButton.removeEventListener("click", onBackClick);
+      search?.removeEventListener("input", render);
+    };
     render();
     };
     const catalogueReady = window.OBEST_PRODUCTS_READY;
+    startCatalog(window.OBEST_PRODUCTS || []);
     if (catalogueReady && typeof catalogueReady.then === "function") {
       catalogueReady.then(startCatalog).catch(error => {
         console.error("Unable to load the O-BEST product catalogue.", error);
-        renderCatalogUnavailable();
+        if (!window.OBEST_PRODUCTS?.length) renderCatalogUnavailable();
       });
-    } else {
-      startCatalog(window.OBEST_PRODUCTS || []);
     }
   }
 
@@ -399,18 +401,23 @@
       const specs = [product.brand && ["Brand", product.brand], product.model && ["Model", product.model], product.capacity && ["Capacity", product.capacity], product.output && ["Output", product.output], product.details && ["Details", product.details]].filter(Boolean);
       const specsMarkup = specs.length ? `<dl class="detail-specs">${specs.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>` : "";
       const photoSource = safeWebUrl(product.photoSource);
-      const photoSourceMarkup = photoSource ? `<p class="detail-photo-source">Supplier reference photo · <a href="${escapeHtml(photoSource)}" target="_blank" rel="noopener noreferrer">view source listing</a>. Confirm the exact part revision and compatibility with the seller.</p>` : "";
-      detail.innerHTML = `<div class="detail-art-wrap">${cardArt(product, 1)}${safeWebUrl(product.image) ? "" : "<span class=\"detail-art-note\">PHOTO<br />TO ADD</span>"}</div><div class="detail-copy"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${escapeHtml(product.categoryName)}</p><h1>${escapeHtml(product.name)}</h1>${availabilityMarkup(product, true)}<p class="detail-description">${escapeHtml(product.description)}</p>${photoSourceMarkup}${specsMarkup}<div class="detail-note"><span class="spark-icon" aria-hidden="true"></span><p>Need help checking compatibility? Send us your device model and ask us about this item.</p></div><a class="button button-yellow" href="request.html?item=${encodeURIComponent(product.name)}">Ask about this item </a><a class="text-link detail-back" href="catalog.html">Back to all products</a></div>`;
+      const photoSourceMarkup = photoSource ? `<p class="detail-photo-source">${product.researchListing ? "Unverified supplier reference image" : product.itemType === "phone-screens" ? "Unverified supplier reference photo" : "Supplier reference photo"} · <a href="${escapeHtml(photoSource)}" target="_blank" rel="noopener noreferrer">view source listing</a>. Confirm the exact part revision and compatibility with the seller.</p>` : "";
+      const researchNotice = product.researchListing ? `<div class="detail-note research-listing-notice"><span class="spark-icon" aria-hidden="true"></span><p>Research candidate only—not confirmed shop stock or verified fit. Ask the shop to check the exact handset model, part revision, connector and panel before relying on compatibility.</p></div>` : "";
+      detail.innerHTML = `<div class="detail-art-wrap">${cardArt(product, 1)}${safeWebUrl(product.image) || safeWebUrl(product.researchImage) ? "" : "<span class=\"detail-art-note\">PHOTO<br />TO ADD</span>"}</div><div class="detail-copy"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${escapeHtml(product.categoryName)}</p><h1>${escapeHtml(product.name)}</h1>${availabilityMarkup(product, true)}<p class="detail-description">${escapeHtml(product.description)}</p>${photoSourceMarkup}${researchNotice}${specsMarkup}<div class="detail-note"><span class="spark-icon" aria-hidden="true"></span><p>Need help checking compatibility? Send us your device model and ask us about this item.</p></div><a class="button button-yellow" href="request.html?item=${encodeURIComponent(product.name)}">Ask about this item </a><a class="text-link detail-back" href="catalog.html">Back to all products</a></div>`;
+    const detailImage = detail.querySelector(".product-photo");
+    if (detailImage) {
+        detailImage.setAttribute("fetchpriority", "high");
+        detailImage.loading = "eager";
+      }
     }
     };
     const catalogueReady = window.OBEST_PRODUCTS_READY;
+    renderDetail(window.OBEST_PRODUCTS || []);
     if (catalogueReady && typeof catalogueReady.then === "function") {
       catalogueReady.then(renderDetail).catch(error => {
         console.error("Unable to load the O-BEST product details.", error);
-        detail.innerHTML = `<div class="not-found"><span class="spark-icon" aria-hidden="true"></span><h1>Product details are temporarily unavailable.</h1><p>Please try again shortly or ask the shop about this item.</p><a class="button button-blue" href="catalog.html">Browse catalogue</a></div>`;
+        if (!window.OBEST_PRODUCTS?.length) detail.innerHTML = `<div class="not-found"><span class="spark-icon" aria-hidden="true"></span><h1>Product details are temporarily unavailable.</h1><p>Please try again shortly or ask the shop about this item.</p><a class="button button-blue" href="catalog.html">Browse catalogue</a></div>`;
       });
-    } else {
-      renderDetail(window.OBEST_PRODUCTS || []);
     }
   }
 

@@ -1,8 +1,16 @@
 {
+  "functions": {
+    "api/product.js": {
+      "includeFiles": "product.html"
+    },
+    "api/lucent-screens.js": {
+      "includeFiles": "api/lucent-screen-research.json"
+    }
+  },
   "rewrites": [
     {
       "source": "/product/:id",
-      "destination": "/product.html?id=:id"
+      "destination": "/api/product?id=:id"
     }
   ],
   "headers": [

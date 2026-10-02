@@ -123,3 +123,6 @@ function createHandler({ fetchImpl = (...args) => fetch(...args) } = {}) {
 module.exports = createHandler();
 module.exports.createHandler = createHandler;
 module.exports.normalizeProduct = normalizeProduct;
+module.exports.PROJECT_ID = PROJECT_ID;
+module.exports.DATASET = DATASET;
+module.exports.API_VERSION = API_VERSION;
