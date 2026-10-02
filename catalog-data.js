@@ -4,7 +4,6 @@
   window.OBEST_PRODUCTS_READY = fetch(endpoint, {
     headers: { Accept: "application/json" },
     mode: "cors",
-    credentials: "omit",
     cache: "no-cache",
     signal: AbortSignal.timeout(12000),
   }).then(async response => {

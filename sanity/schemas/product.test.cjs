@@ -72,9 +72,9 @@ test("catalogue API reads only published, bounded, public Sanity product fields"
   assert.doesNotMatch(handler, /token|Authorization/i);
 });
 
-test("browser catalogue loader calls the same-origin public read endpoint", () => {
+test("browser catalogue loader calls the same-origin read endpoint with Preview access cookies", () => {
   const dataClient = fs.readFileSync(path.join(root, "catalog-data.js"), "utf8");
   assert.match(dataClient, /const endpoint = "\/api\/catalogue"/);
-  assert.match(dataClient, /credentials: "omit"/);
+  assert.doesNotMatch(dataClient, /credentials: "omit"/);
   assert.equal(JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8")).scripts["studio:build"], "sanity build");
 });
