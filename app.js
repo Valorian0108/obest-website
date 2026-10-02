@@ -3,12 +3,33 @@
   const itemTypeNames = { "power-banks": "Power banks", chargers: "Chargers", cables: "Cables", earbuds: "Earbuds", headphones: "Headphones", mice: "Mice", smartwatches: "Smartwatches", fans: "Fans", cookers: "Cookers", "vacuum-cleaners": "Vacuum cleaners", "phone-screens": "Phone screens", "power-flex": "Power/volume flexes" };
   // Availability defaults are shop-approved display states; individual records can override the default.
   const availabilityByItemType = Object.freeze({ "phone-screens": "available" });
+  const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[character]);
+  const safeWebUrl = value => {
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+    } catch {
+      return "";
+    }
+  };
   const availabilityFor = product => product.availability || availabilityByItemType[product.itemType] || "check";
   const availabilityMarkup = (product, detail = false) => {
-    const available = availabilityFor(product) === "available";
-    const status = available ? "Available" : detail ? "Ask us to check availability" : "Ask us to check";
+    const availability = availabilityFor(product);
+    const available = availability === "available";
+    const unavailable = availability === "unavailable";
+    const status = available
+      ? "Available"
+      : unavailable
+        ? "Unavailable"
+        : detail ? "Ask us to check availability" : "Ask us to check";
     const containerClass = detail ? "availability-pill" : "product-availability";
-    return `<span class="${containerClass}"><span class="availability-dot${available ? " availability-dot--available" : ""}" aria-hidden="true"></span>${detail ? status : `<span>${status}</span>`}</span>`;
+    return `<span class="${containerClass}"><span class="availability-dot${available ? " availability-dot--available" : unavailable ? " availability-dot--unavailable" : ""}" aria-hidden="true"></span>${detail ? status : `<span>${status}</span>`}</span>`;
   };
   const iconMarkup = (type) => {
     const icons = {
@@ -36,8 +57,13 @@
     };
     return `<svg viewBox="0 0 68 68" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${icons[type] || icons.case}</svg>`;
   };
-  const cardArt = (product, index = 0) => `<div class="product-art product-art-${index % 4}${product.image ? " product-art--photo" : ""}" ${product.image ? "" : "aria-hidden=\"true\""}>${product.image ? `<img class="product-photo" src="${product.image}" alt="${product.imageAlt || (product.itemType === "power-flex" ? `Supplier reference photo of ${product.name}` : `${product.name} packaging and product`)}" loading="lazy" />` : `<span class="product-art-stamp">O-BEST / ${String(index + 1).padStart(2, "0")}</span><div class="product-object object-${product.icon}">${iconMarkup(product.icon)}</div><span class="art-spark spark-icon" aria-hidden="true"></span>`}</div>`;
-  const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="/product/${encodeURIComponent(product.id)}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${itemTypeNames[product.itemType] || product.categoryName}</p><h2>${product.name}</h2><p class="product-card-description">${product.description}</p><div class="product-card-bottom">${availabilityMarkup(product)}<span class="card-action-cue" aria-hidden="true">View item details</span></div></div></a></article>`;
+  const cardArt = (product, index = 0) => {
+    const image = safeWebUrl(product.image);
+    const icon = typeof product.icon === "string" ? product.icon.replace(/[^a-z0-9-]/gi, "") : "case";
+    const alt = product.imageAlt || (product.itemType === "power-flex" ? `Supplier reference photo of ${product.name}` : `${product.name} packaging and product`);
+    return `<div class="product-art product-art-${index % 4}${image ? " product-art--photo" : ""}" ${image ? "" : "aria-hidden=\"true\""}>${image ? `<img class="product-photo" src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" loading="lazy" />` : `<span class="product-art-stamp">O-BEST / ${String(index + 1).padStart(2, "0")}</span><div class="product-object object-${escapeHtml(icon)}">${iconMarkup(icon)}</div><span class="art-spark spark-icon" aria-hidden="true"></span>`}</div>`;
+  };
+  const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="/product/${encodeURIComponent(product.id)}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${escapeHtml(itemTypeNames[product.itemType] || product.categoryName)}</p><h2>${escapeHtml(product.name)}</h2><p class="product-card-description">${escapeHtml(product.description)}</p><div class="product-card-bottom">${availabilityMarkup(product)}<span class="card-action-cue" aria-hidden="true">View item details</span></div></div></a></article>`;
 
   document.querySelectorAll("[data-year]").forEach(el => el.textContent = new Date().getFullYear());
   const currentPath = location.pathname === "/" ? "/index.html" : location.pathname;
@@ -168,6 +194,15 @@
   const grid = document.getElementById("product-grid");
   const categoryGrid = document.getElementById("category-grid");
   if (grid && categoryGrid) {
+    const renderCatalogUnavailable = () => {
+      categoryGrid.hidden = true;
+      grid.hidden = true;
+      brandFilter.hidden = true;
+      backButton.hidden = true;
+      emptyResults.hidden = false;
+      emptyResults.innerHTML = `<span class="spark-icon" aria-hidden="true"></span><h2>Catalogue temporarily unavailable.</h2><p>Please try again shortly or contact the shop to ask about an item.</p><a class="button button-blue" href="request.html">Contact the shop</a>`;
+      resultCount.textContent = "Catalogue unavailable";
+    };
     const search = document.getElementById("product-search");
     const backButton = document.getElementById("category-back");
     const brandFilter = document.getElementById("brand-filter");
@@ -198,7 +233,8 @@
     ];
     const typeIcons = { "power-banks": "bank", chargers: "charger", cables: "cable", earbuds: "earbuds", headphones: "headphones", mice: "mouse", smartwatches: "watch", fans: "fan", cookers: "cooker", "vacuum-cleaners": "vacuum", "phone-screens": "screenpart", "power-flex": "flex" };
     // Batch 1 is approved; batch 2 is now open for the next owner review.
-    const products = (window.OBEST_PRODUCTS || []).filter(product => product.batch <= 2);
+    const startCatalog = catalogueProducts => {
+    const products = (catalogueProducts || []).filter(product => product && typeof product.id === "string" && typeof product.name === "string");
     const brandSlug = brand => normalizeSearch(brand || "Other").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "other";
     const phoneScreenProducts = products.filter(product => product.itemType === "phone-screens");
     const phoneScreenBrands = [...new Map(phoneScreenProducts.map(product => [brandSlug(product.brand), product.brand || "Other"]))]
@@ -270,7 +306,7 @@
       const showBrandFilter = activeCategory === "parts" && activeItemType === "phone-screens";
       brandFilter.hidden = !showBrandFilter;
       if (showBrandFilter) {
-        brandFilter.innerHTML = `<span class="catalog-brand-filter-label">Filter by brand</span><div class="catalog-brand-chips"><button class="filter-chip${activeBrand ? "" : " active"}" type="button" data-brand="" aria-pressed="${!activeBrand}">All brands <span>${phoneScreenProducts.length}</span></button>${phoneScreenBrands.map(brand => `<button class="filter-chip${activeBrand === brand.slug ? " active" : ""}" type="button" data-brand="${brand.slug}" aria-pressed="${activeBrand === brand.slug}">${brand.name} <span>${brand.count}</span></button>`).join("")}</div>`;
+        brandFilter.innerHTML = `<span class="catalog-brand-filter-label">Filter by brand</span><div class="catalog-brand-chips"><button class="filter-chip${activeBrand ? "" : " active"}" type="button" data-brand="" aria-pressed="${!activeBrand}">All brands <span>${phoneScreenProducts.length}</span></button>${phoneScreenBrands.map(brand => `<button class="filter-chip${activeBrand === brand.slug ? " active" : ""}" type="button" data-brand="${escapeHtml(brand.slug)}" aria-pressed="${activeBrand === brand.slug}">${escapeHtml(brand.name)} <span>${brand.count}</span></button>`).join("")}</div>`;
       }
       grid.innerHTML = items.map(productCard).join("");
       categoryGrid.hidden = true;
@@ -326,6 +362,16 @@
     });
     search?.addEventListener("input", render);
     render();
+    };
+    const catalogueReady = window.OBEST_PRODUCTS_READY;
+    if (catalogueReady && typeof catalogueReady.then === "function") {
+      catalogueReady.then(startCatalog).catch(error => {
+        console.error("Unable to load the O-BEST product catalogue.", error);
+        renderCatalogUnavailable();
+      });
+    } else {
+      startCatalog(window.OBEST_PRODUCTS || []);
+    }
   }
 
   const detail = document.getElementById("product-detail");
@@ -339,7 +385,8 @@
         id = "";
       }
     }
-    const product = (window.OBEST_PRODUCTS || []).find(p => p.id === id);
+    const renderDetail = products => {
+    const product = (products || []).find(p => p.id === id);
     if (!product) {
       detail.innerHTML = `<div class="not-found"><span class="spark-icon" aria-hidden="true"></span><h1>That item isn’t here yet.</h1><p>Explore the catalogue or tell us what you’re looking for.</p><a class="button button-blue" href="catalog.html">Browse catalogue </a></div>`;
     } else {
@@ -350,9 +397,20 @@
         ? `${product.description} Listed as available; confirm the exact model fit and current stock with O-BEST.`
         : `${product.description} Ask O-BEST to check current availability.`;
       const specs = [product.brand && ["Brand", product.brand], product.model && ["Model", product.model], product.capacity && ["Capacity", product.capacity], product.output && ["Output", product.output], product.details && ["Details", product.details]].filter(Boolean);
-      const specsMarkup = specs.length ? `<dl class="detail-specs">${specs.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>` : "";
-       const photoSourceMarkup = product.photoSource ? `<p class="detail-photo-source">Supplier reference photo · <a href="${product.photoSource}" target="_blank" rel="noopener noreferrer">view source listing</a>. Confirm the exact part revision and compatibility with the seller.</p>` : "";
-        detail.innerHTML = `<div class="detail-art-wrap">${cardArt(product, 1)}${product.image ? "" : "<span class=\"detail-art-note\">PHOTO<br />TO ADD</span>"}</div><div class="detail-copy"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${product.categoryName}</p><h1>${product.name}</h1>${availabilityMarkup(product, true)}<p class="detail-description">${product.description}</p>${photoSourceMarkup}${specsMarkup}<div class="detail-note"><span class="spark-icon" aria-hidden="true"></span><p>Need help checking compatibility? Send us your device model and ask us about this item.</p></div><a class="button button-yellow" href="request.html?item=${encodeURIComponent(product.name)}">Ask about this item </a><a class="text-link detail-back" href="catalog.html">Back to all products</a></div>`;
+      const specsMarkup = specs.length ? `<dl class="detail-specs">${specs.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>` : "";
+      const photoSource = safeWebUrl(product.photoSource);
+      const photoSourceMarkup = photoSource ? `<p class="detail-photo-source">Supplier reference photo · <a href="${escapeHtml(photoSource)}" target="_blank" rel="noopener noreferrer">view source listing</a>. Confirm the exact part revision and compatibility with the seller.</p>` : "";
+      detail.innerHTML = `<div class="detail-art-wrap">${cardArt(product, 1)}${safeWebUrl(product.image) ? "" : "<span class=\"detail-art-note\">PHOTO<br />TO ADD</span>"}</div><div class="detail-copy"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${escapeHtml(product.categoryName)}</p><h1>${escapeHtml(product.name)}</h1>${availabilityMarkup(product, true)}<p class="detail-description">${escapeHtml(product.description)}</p>${photoSourceMarkup}${specsMarkup}<div class="detail-note"><span class="spark-icon" aria-hidden="true"></span><p>Need help checking compatibility? Send us your device model and ask us about this item.</p></div><a class="button button-yellow" href="request.html?item=${encodeURIComponent(product.name)}">Ask about this item </a><a class="text-link detail-back" href="catalog.html">Back to all products</a></div>`;
+    }
+    };
+    const catalogueReady = window.OBEST_PRODUCTS_READY;
+    if (catalogueReady && typeof catalogueReady.then === "function") {
+      catalogueReady.then(renderDetail).catch(error => {
+        console.error("Unable to load the O-BEST product details.", error);
+        detail.innerHTML = `<div class="not-found"><span class="spark-icon" aria-hidden="true"></span><h1>Product details are temporarily unavailable.</h1><p>Please try again shortly or ask the shop about this item.</p><a class="button button-blue" href="catalog.html">Browse catalogue</a></div>`;
+      });
+    } else {
+      renderDetail(window.OBEST_PRODUCTS || []);
     }
   }
 

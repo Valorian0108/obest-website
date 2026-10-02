@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const { createHandler } = require("../api/request.js");
+const { createHandler: createCatalogueHandler, normalizeProduct } = require("../api/catalogue.js");
 
 const productsContext = {};
 vm.runInNewContext(fs.readFileSync(require.resolve("../products.js"), "utf8").replace("window.OBEST_PRODUCTS =", "globalThis.OBEST_PRODUCTS ="), productsContext);
@@ -14,6 +15,65 @@ test("catalogue product IDs are unique and referenced images exist", () => {
   assert.equal(new Set(ids).size, ids.length, "product IDs must be unique");
   const missingImages = products.filter(product => product.image && !fs.existsSync(path.resolve(__dirname, "..", product.image)));
   assert.deepEqual(missingImages.map(product => product.image), []);
+});
+
+test("catalogue API only returns normalized public fields and safe Sanity images", () => {
+  const product = normalizeProduct({
+    id: "usb-c-cable",
+    name: "USB-C cable <script>alert(1)</script>",
+    category: "power",
+    itemType: "cables",
+    description: "A braided cable",
+    availability: "available",
+    icon: "cable",
+    image: "https://cdn.sanity.io/images/ese1smjb/production/example.jpg",
+    imageAlt: "Cable",
+    secret: "must not be returned",
+  });
+
+  assert.equal(product.name, "USB-C cable <script>alert(1)</script>");
+  assert.equal(product.categoryName, "Power & charging");
+  assert.equal(product.image, "https://cdn.sanity.io/images/ese1smjb/production/example.jpg");
+  assert.equal(Object.hasOwn(product, "secret"), false);
+  assert.equal(normalizeProduct({ ...product, image: "https://attacker.example/image.jpg" }).image, "");
+  assert.equal(normalizeProduct({ ...product, image: "https://cdn.sanity.io/images/another-project/production/example.jpg" }).image, "");
+  assert.equal(normalizeProduct({ ...product, availability: "delete-all" }).availability, "check");
+  assert.equal(normalizeProduct({ ...product, id: "bad/id" }), null);
+});
+
+test("catalogue API is read-only and does not claim success when Sanity is unavailable", async () => {
+  const calls = [];
+  const handler = createCatalogueHandler({
+    fetchImpl: async (url, options) => {
+      calls.push({ url: new URL(url), options });
+      return { ok: true, json: async () => ({ result: [{ id: "one", name: "Cable", category: "power", itemType: "cables", description: "Braided cable" }, null] }) };
+    },
+  });
+  const response = mockResponse();
+  await handler({ method: "GET" }, response);
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.result.length, 1);
+  assert.equal(calls[0].url.hostname, "ese1smjb.api.sanity.io");
+  assert.equal(calls[0].url.pathname, "/v2025-01-01/data/query/production");
+  assert.equal(calls[0].options.method, "GET");
+  assert.equal(calls[0].options.headers.Authorization, undefined);
+
+  const unavailable = createCatalogueHandler({ fetchImpl: async () => { throw new Error("offline"); } });
+  const failedResponse = mockResponse();
+  await unavailable({ method: "GET" }, failedResponse);
+  assert.equal(failedResponse.statusCode, 503);
+  assert.deepEqual(failedResponse.body, { message: "The product catalogue is temporarily unavailable." });
+});
+
+test("catalogue and detail pages retain the bundled catalogue as a safe CMS fallback", () => {
+  const root = path.resolve(__dirname, "..");
+  const home = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const catalog = fs.readFileSync(path.join(root, "catalog.html"), "utf8");
+  const product = fs.readFileSync(path.join(root, "product.html"), "utf8");
+  assert.match(home, /<script src="products\.js"><\/script>/, "homepage remains on the current catalogue source");
+  assert.match(catalog, /<script src="products\.js"><\/script>\s*<script src="catalog-data\.js"><\/script>/);
+  assert.match(product, /<script src="products\.js"><\/script>\s*<script src="catalog-data\.js"><\/script>/);
+  assert.ok(fs.existsSync(path.join(root, "api", "catalogue.js")), "catalogue is served by the standard Vercel API route");
 });
 
 test("home and catalogue only link to categories and product types with listings", () => {

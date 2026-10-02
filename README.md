@@ -37,3 +37,13 @@ The linked Vercel project has protected Production and Preview deployments. Do n
 ## Editing catalogue items
 
 Each catalogue item is an object in `products.js`. Current visible categories are `power`, `audio`, `computing`, `wearables`, `home`, and `parts`; empty categories are not promoted. Give each item a unique `id`; product links and category filtering are generated from this data.
+
+## Sanity catalogue preview (not published)
+
+- Run `npm install`, then `npm run studio` to open the owner-owned O-BEST Sanity Studio at `http://localhost:3333`. Sign in with your own invited Sanity account; do not put a Sanity token in the website or commit one. The schema supports the catalogue's categories, product types, descriptions, images, optional specifications/source links, and manually selected `Ask us to check`, `Available`, or `Unavailable` status. It does not track quantity or sell products.
+- `sanity/` and the `/api/catalogue` read endpoint are preview implementation work. Product and detail pages use Sanity-published records when present and fall back to the current bundled `products.js` catalogue if the API is empty or unavailable. The homepage and existing live Production have not been switched.
+- `npm run studio:build` builds the editor locally. Build output is ignored and must not be included in the public site deployment.
+- Keep Vercel's `Output Directory` unset/default so API routes remain enabled; do not point it at the Sanity Studio `dist/` build for the catalogue site.
+- Run `npm run catalogue:import:dry-run` to check the 130 records and 121 referenced photo paths without writing to Sanity. `npm run catalogue:import` is a **write to the owner's public `production` dataset**. It refuses to run unless `OBEST_CONFIRM_CATALOGUE_IMPORT=yes` is explicitly set, refuses any existing product records, uploads only referenced catalogue images, and creates the records in one transaction. Use the Sanity owner account only after the owner explicitly approves the import. After import, check the Studio and use a protected Preview build for visual/content review; do not publish/deploy to Production without separate approval.
+- This project's current Vercel preview deployment has not been added to Sanity CORS. The public site's reader uses a same-origin server API and requires no CORS entry or Sanity credential. Do not add a broad Vercel wildcard or permit credentials for website reads.
+- The initial Sanity 6 install surfaced 15 audit findings; after moving to Sanity 5.31.2, `npm audit` reports 8 findings (4 moderate, 4 high) in the Studio/CLI dependency tree. Do not use `npm audit fix --force` blindly; re-evaluate with a compatible Sanity release when the upstream fixes are available.

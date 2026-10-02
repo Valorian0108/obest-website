@@ -1,5 +1,8 @@
 .vercel
 node_modules
+/dist/
+/.sanity/
+.env.local
 .env
 .env.*
 !.env.example
