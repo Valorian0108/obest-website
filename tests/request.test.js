@@ -39,12 +39,14 @@ test("home and catalogue only link to categories and product types with listings
 test("product cards use clean URLs while the detail page keeps legacy links working", () => {
   const root = path.resolve(__dirname, "..");
   const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const productHtml = fs.readFileSync(path.join(root, "product.html"), "utf8");
   const vercel = JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
   const productRewrite = vercel.rewrites.find(rule => rule.source === "/product/:id");
 
   assert.match(app, /href="\/product\/\$\{encodeURIComponent\(product\.id\)\}"/);
   assert.ok(app.includes('const pathMatch = location.pathname.match(/^\\/product\\/([^/]+)\\/?$/);'));
   assert.match(app, /new URLSearchParams\(location\.search\)\.get\("id"\)/, "existing ?id=product-id URLs should remain supported");
+  assert.match(productHtml, /<base href="\/"\s*\/>/, "clean product routes should resolve page assets from the site root");
   assert.equal(productRewrite?.destination, "/product.html?id=:id");
 });
 
