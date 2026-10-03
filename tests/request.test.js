@@ -60,7 +60,7 @@ test("product imagery reserves layout space and is promoted for product-page LCP
 
 test("Google Fonts load without blocking first paint while site CSS stays render-blocking", () => {
   const root = path.resolve(__dirname, "..");
-  const pages = ["index.html", "catalog.html", "guides.html", "charging-guide.html", "about.html", "product.html", "request.html", "privacy.html", "404.html"];
+  const pages = ["index.html", "catalog.html", "guides.html", "charging-guide.html", "charging-port-guide.html", "about.html", "product.html", "request.html", "privacy.html", "404.html"];
   for (const file of pages) {
     const html = fs.readFileSync(path.join(root, file), "utf8");
     assert.match(html, /href="https:\/\/fonts\.googleapis\.com\/css2\?[^\"]+" rel="stylesheet" media="print" onload="this\.media='all'"/, `${file} should load Google Fonts non-blocking`);
@@ -76,6 +76,7 @@ test("public stable pages use canonical URLs and specific social metadata", () =
     ["catalog.html", "https://www.obestlink.com/catalog.html"],
     ["guides.html", "https://www.obestlink.com/guides.html"],
     ["charging-guide.html", "https://www.obestlink.com/charging-guide.html"],
+    ["charging-port-guide.html", "https://www.obestlink.com/charging-port-guide.html"],
     ["about.html", "https://www.obestlink.com/about.html"]
   ];
 
@@ -367,18 +368,31 @@ test("product page metadata falls back safely when Sanity is unavailable", async
   assert.doesNotMatch(res.body, /property="og:url"/);
 });
 
-test("the owner-approved charging checklist is presented as available general guidance", () => {
+test("published guides include the owner-approved charger checklist and safe loose-port advice", () => {
   const root = path.resolve(__dirname, "..");
   const guides = fs.readFileSync(path.join(root, "guides.html"), "utf8");
   const article = fs.readFileSync(path.join(root, "charging-guide.html"), "utf8");
+  const portArticle = fs.readFileSync(path.join(root, "charging-port-guide.html"), "utf8");
+  const sitemap = fs.readFileSync(path.join(root, "sitemap.xml"), "utf8");
 
-  assert.match(guides, /01 GUIDE AVAILABLE/);
+  assert.match(guides, /02 GUIDES AVAILABLE/);
+  assert.match(guides, /Why does my charging cable feel loose\?/);
+  assert.match(guides, /href="charging-port-guide\.html"/);
+  assert.doesNotMatch(guides, /Power-bank capacity and output|Phone battery draining quickly|What to check before buying a phone part|Everyday accessory care/);
   assert.match(guides, /class="guide-status-label">GENERAL CHECKLIST</);
   assert.match(guides, /href="charging-guide\.html"/);
-  assert.doesNotMatch(guides, /DRAFT|FOR REVIEW|READY FOR REVIEW/);
+  assert.doesNotMatch(guides, /FOR REVIEW|READY FOR REVIEW/);
   assert.doesNotMatch(article, /DRAFT|FOR REVIEW|Editorial status:/);
   assert.match(article, /not a compatibility guarantee/);
   assert.match(article, /Google Pixel Help: Charge your Pixel phone/);
+
+  assert.match(portArticle, /<title>Why does my charging cable feel loose\? \| O-BEST<\/title>/);
+  assert.match(portArticle, /a loose connection can be frustrating/i);
+  assert.match(portArticle, /Do not scrape inside the port with a pin/);
+  assert.match(portArticle, /Turning the phone off does not make inserting a pin safe/);
+  assert.match(portArticle, /Apple Support: Important handling information for iPhone/);
+  assert.match(portArticle, /qualified technician/);
+  assert.match(sitemap, /https:\/\/www\.obestlink\.com\/charging-port-guide\.html/);
 });
 
 test("shared script marks only the current navigation route for assistive technology", () => {
