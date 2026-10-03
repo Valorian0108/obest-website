@@ -8,7 +8,9 @@
     "studio": "sanity dev --port 3333",
     "studio:build": "sanity build",
     "catalogue:import:dry-run": "sanity exec sanity/scripts/migrate-products.ts -- --dry-run",
-    "catalogue:import": "sanity exec sanity/scripts/migrate-products.ts --with-user-token"
+    "catalogue:import": "sanity exec sanity/scripts/migrate-products.ts --with-user-token",
+    "screens:import:dry-run": "sanity exec sanity/scripts/import-lucent-screen-research.ts --with-user-token",
+    "screens:import": "sanity exec sanity/scripts/import-lucent-screen-research.ts --with-user-token -- --confirm-production"
   },
   "engines": {
     "node": ">=20"

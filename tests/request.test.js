@@ -272,10 +272,9 @@ test("Lucent screen review cards are research-only and use linked supplier photo
   const styles = fs.readFileSync(path.resolve(__dirname, "..", "styles.css"), "utf8");
   assert.match(api, /req\.method !== "GET"/);
   assert.match(api, /Use GET to read the Lucent research screen list/);
-  assert.match(app, /Lucent supplier photo/);
+  assert.doesNotMatch(app, /research-photo-label|Lucent supplier photo/);
   assert.doesNotMatch(app, /Supplier photo · unverified|Unverified supplier reference image|Research candidate only—not confirmed shop stock or verified fit/);
   assert.match(styles, /\.product-art--research \.product-photo/);
-  assert.match(styles, /\.research-photo-label/);
 });
 
 test("home and catalogue only link to categories and product types with listings", () => {
