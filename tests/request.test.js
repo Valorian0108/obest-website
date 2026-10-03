@@ -94,6 +94,18 @@ test("public stable pages use canonical URLs and specific social metadata", () =
   assert.doesNotMatch(product, /<link rel="canonical"/, "the unselected shared shell must not claim a product canonical URL");
 });
 
+test("all site pages use the O-BEST browser-tab favicon", () => {
+  const root = path.resolve(__dirname, "..");
+  const pages = fs.readdirSync(root).filter(file => file.endsWith(".html") && file !== "google0c1b8f21454b47a6.html");
+  for (const page of pages) {
+    const html = fs.readFileSync(path.join(root, page), "utf8");
+    assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/assets\/obest-favicon\.svg"\s*\/?\s*>/, `${page} should point to the shared favicon`);
+  }
+  const icon = fs.readFileSync(path.join(root, "assets/obest-favicon.svg"), "utf8");
+  assert.match(icon, /<circle[^>]+fill="#ffd43b"/);
+  assert.match(icon, /fill="#063b82"/);
+});
+
 test("homepage search metadata targets O-BEST's confirmed Iju-Ishaga shop and real offer", () => {
   const html = fs.readFileSync(path.resolve(__dirname, "..", "index.html"), "utf8");
   assert.match(html, /<title>Phone Accessories in Iju-Ishaga, Lagos \| O-BEST<\/title>/);
