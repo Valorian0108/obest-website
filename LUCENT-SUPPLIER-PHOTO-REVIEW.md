@@ -1,6 +1,6 @@
 ﻿# Lucent supplier-photo review sheet
 
-**Research only.** The images below are remote previews hotlinked from Lucent Parts and are provided for review only. They are supplier reference photos—not independently verified model matches, part numbers, stock, quality, or compatibility—and are not approved customer-catalogue assets. No image files have been downloaded or copied into the website. Confirm exact handset code, screen assembly part number/revision, flex and connector layout, frame variant, and panel technology before considering any listing.
+**Research only.** The images below are remote previews hotlinked from Lucent Parts. On 3 October 2026, the owner confirmed that the supplier photos and listed screen/model matches have been verified for these research listings. This does not confirm O-BEST stock or current availability; those remain subject to shop confirmation. No image files have been downloaded or copied into the website.
 ## TECNO — 40 listed screens
 
 ### LCD Assembly Without Frame Compatible For Tecno Camon 11 LCD Screen Display

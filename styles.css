@@ -39,6 +39,7 @@
 .request-form .form-status.status-warning{background:#fff5d4;border-left:3px solid var(--yellow);color:#55420d}
 .request-form .form-status.status-success{background:#eaf7f2;border-left:3px solid #32856c;color:#205d4b}
 .request-form .form-submit:disabled{opacity:.7;cursor:wait}
+.request-whatsapp{margin-top:18px;padding-top:4px;text-align:center}.request-whatsapp-divider{display:flex;align-items:center;gap:12px;margin:0 0 13px;color:#718294;font-size:9px;font-weight:800;letter-spacing:.14em}.request-whatsapp-divider:before,.request-whatsapp-divider:after{content:"";height:1px;flex:1;background:#dce3e8}.request-whatsapp .button{width:100%;min-height:48px;border-color:#35a978;color:#126d4b;background:#fff}.request-whatsapp .button:hover{background:#effaf4}.request-whatsapp>p{margin:9px 0 0;color:#536779;font-size:10px;line-height:1.7}
 
 /* Guide article */
 .guide-teaser{display:flex;align-items:center;justify-content:space-between;gap:32px;padding:38px clamp(24px,9.1vw,145px);background:#f3f6f2;border-top:1px solid var(--line)}

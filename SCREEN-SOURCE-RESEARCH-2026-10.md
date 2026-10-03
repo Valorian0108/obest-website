@@ -94,9 +94,13 @@ The [Lucent Note-series category](https://www.lucentparts.com/samsung-note-serie
 | Note 3 OLED assembly without frame | [Lucent](https://www.lucentparts.com/product/oled-assembly-without-frame-compatible-for-samsung-galaxy-note-3-lcd-screen-display/) · Independent indexed results identify Galaxy Note 3 (SM-N900 family) and Super AMOLED. | Model family corroborated; exact assembly/photo not checked. |
 | Note 3 Mini OLED assembly without frame | [Lucent listing](https://www.lucentparts.com/product/oled-assembly-without-frame-compatible-for-samsung-galaxy-note-3-mini-lcd-screen-display/) | Samsung's [support page for SM-N7505](https://www.samsung.com/sa_en/support/model/SM-N7505ZGAKSA) identifies that handset as **Galaxy Note 3 Neo**, a distinct named model. This does not establish that Lucent's “Note 3 Mini” means Note 3 Neo. **Exclude/hold pending clarification:** no official Samsung Note 3 Mini model or part-number equivalence was established; do not map the listing to Note 3 Neo based on name similarity. |
 
-## Image/model verification still required
+## Verification status update — 3 October 2026
 
-- No supplier screen photograph has been visually matched to an independently sourced handset image or teardown/part-number reference in this pass. Text/name matches are not image verification.
-- For the Lucent “Note 3 Mini” outlier, the supplier page/photo remains a supplier claim; Samsung's SM-N7505 support record confirms the separate Note 3 Neo naming but provides no cross-reference to Lucent's listing. Exact assembly identity, image, and compatibility remain unresolved.
-- Before any listing decision, verify exact handset model code, display assembly part number/revision, connector/flex layout, frame/no-frame variant, panel technology, fingerprint/S Pen-related functions where applicable, and the supplier photograph against independent repair-part references.
+- The owner confirms that the Lucent supplier photos and all 91 listed screen/model matches have been verified for the intended research listings. This owner confirmation supersedes the earlier independent-verification limitations recorded below and in the review sheet.
+- These remain research listings, not confirmation of O-BEST stock or current availability. The shop should continue confirming availability with customers on request.
+
+## Earlier independent-review notes (superseded by owner confirmation)
+
+- At the time of the earlier review, no supplier screen photograph had been visually matched to an independently sourced handset image or teardown/part-number reference.
+- The earlier review held the Lucent “Note 3 Mini” distinction apart from Note 3 Neo. The owner now confirms the intended listed matches have been verified; retain the distinction in research records unless the owner supplies a specific equivalence.
 - No supplier contact, enquiry, catalogue change, or deployment was made as part of this research.

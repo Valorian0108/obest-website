@@ -62,7 +62,7 @@
     const icon = typeof product.icon === "string" ? product.icon.replace(/[^a-z0-9-]/gi, "") : "case";
     const alt = product.imageAlt || (product.itemType === "phone-screens" || product.itemType === "power-flex" ? `Supplier reference photo of ${product.name}` : `${product.name} packaging and product`);
     const researchClass = product.researchListing ? " product-art--research" : "";
-    const researchLabel = product.researchListing ? "<span class=\"research-photo-label\">Supplier photo · unverified</span>" : "";
+    const researchLabel = product.researchListing ? "<span class=\"research-photo-label\">Lucent supplier photo</span>" : "";
     return `<div class="product-art product-art-${index % 4}${image ? " product-art--photo" : ""}${researchClass}" ${image ? "" : "aria-hidden=\"true\""}>${image ? `<img class="product-photo" src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" width="800" height="800" loading="lazy" decoding="async" />${researchLabel}` : `<span class="product-art-stamp">O-BEST / ${String(index + 1).padStart(2, "0")}</span><div class="product-object object-${escapeHtml(icon)}">${iconMarkup(icon)}</div><span class="art-spark spark-icon" aria-hidden="true"></span>`}</div>`;
   };
   const productCard = (product, index) => `<article class="product-card"><a class="product-card-link" href="/product/${encodeURIComponent(product.id)}">${cardArt(product, index)}<div class="product-card-copy"><p class="product-category">${escapeHtml(itemTypeNames[product.itemType] || product.categoryName)}${product.researchListing ? " · Supplier research" : ""}</p><h2>${escapeHtml(product.name)}</h2><p class="product-card-description">${escapeHtml(product.description)}</p><div class="product-card-bottom">${availabilityMarkup(product)}<span class="card-action-cue" aria-hidden="true">View item details</span></div></div></a></article>`;
@@ -401,8 +401,8 @@
       const specs = [product.brand && ["Brand", product.brand], product.model && ["Model", product.model], product.capacity && ["Capacity", product.capacity], product.output && ["Output", product.output], product.details && ["Details", product.details]].filter(Boolean);
       const specsMarkup = specs.length ? `<dl class="detail-specs">${specs.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>` : "";
       const photoSource = safeWebUrl(product.photoSource);
-      const photoSourceMarkup = photoSource ? `<p class="detail-photo-source">${product.researchListing ? "Unverified supplier reference image" : product.itemType === "phone-screens" ? "Unverified supplier reference photo" : "Supplier reference photo"} · <a href="${escapeHtml(photoSource)}" target="_blank" rel="noopener noreferrer">view source listing</a>. Confirm the exact part revision and compatibility with the seller.</p>` : "";
-      const researchNotice = product.researchListing ? `<div class="detail-note research-listing-notice"><span class="spark-icon" aria-hidden="true"></span><p>Research candidate only—not confirmed shop stock or verified fit. Ask the shop to check the exact handset model, part revision, connector and panel before relying on compatibility.</p></div>` : "";
+      const photoSourceMarkup = photoSource ? `<p class="detail-photo-source">${product.researchListing ? "Lucent supplier reference image" : product.itemType === "phone-screens" ? "Supplier reference photo" : "Supplier reference photo"} · <a href="${escapeHtml(photoSource)}" target="_blank" rel="noopener noreferrer">view source listing</a>. Availability is confirmed by the shop on request.</p>` : "";
+      const researchNotice = product.researchListing ? `<div class="detail-note research-listing-notice"><span class="spark-icon" aria-hidden="true"></span><p>Lucent supplier listing and photo. Availability is confirmed by the shop on request.</p></div>` : "";
       detail.innerHTML = `<div class="detail-art-wrap">${cardArt(product, 1)}${safeWebUrl(product.image) || safeWebUrl(product.researchImage) ? "" : "<span class=\"detail-art-note\">PHOTO<br />TO ADD</span>"}</div><div class="detail-copy"><p class="eyebrow eyebrow-dark"><span class="eyebrow-line"></span> ${escapeHtml(product.categoryName)}</p><h1>${escapeHtml(product.name)}</h1>${availabilityMarkup(product, true)}<p class="detail-description">${escapeHtml(product.description)}</p>${photoSourceMarkup}${researchNotice}${specsMarkup}<div class="detail-note"><span class="spark-icon" aria-hidden="true"></span><p>Need help checking compatibility? Send us your device model and ask us about this item.</p></div><a class="button button-yellow" href="request.html?item=${encodeURIComponent(product.name)}">Ask about this item </a><a class="text-link detail-back" href="catalog.html">Back to all products</a></div>`;
     const detailImage = detail.querySelector(".product-photo");
     if (detailImage) {
@@ -422,6 +422,22 @@
   }
 
   const requestForm = document.getElementById("request-form");
+  const whatsappRequestLink = document.getElementById("whatsapp-request-link");
+  const updateWhatsappRequestLink = () => {
+    if (!requestForm || !whatsappRequestLink) return;
+    const item = requestForm.elements.namedItem("item")?.value.trim();
+    const model = requestForm.elements.namedItem("model")?.value.trim();
+    const details = requestForm.elements.namedItem("details")?.value.trim();
+    const message = [
+      "Hi O-BEST, can you check availability for this item?",
+      item ? `Item: ${item}` : "",
+      model ? `Device/model: ${model}` : "",
+      details ? `Details: ${details}` : "",
+    ].filter(Boolean).join("\n");
+    whatsappRequestLink.href = `https://wa.me/2348105463451?text=${encodeURIComponent(message)}`;
+  };
+  requestForm?.addEventListener("input", updateWhatsappRequestLink);
+  updateWhatsappRequestLink();
   let retryKey = "";
   let retryPayload = "";
   requestForm?.addEventListener("submit", async event => {

@@ -93,6 +93,32 @@ test("public stable pages use canonical URLs and specific social metadata", () =
   assert.doesNotMatch(product, /<link rel="canonical"/, "the unselected shared shell must not claim a product canonical URL");
 });
 
+test("homepage search metadata targets O-BEST's confirmed Iju-Ishaga shop and real offer", () => {
+  const html = fs.readFileSync(path.resolve(__dirname, "..", "index.html"), "utf8");
+  assert.match(html, /<title>Phone Accessories in Iju-Ishaga, Lagos \| O-BEST<\/title>/);
+  assert.match(html, /<meta name="description" content="[^\"]*phone accessories[^\"]*Iju-Ishaga, Lagos[^\"]*Ask us to check availability/);
+  assert.match(html, /<meta property="og:title" content="Phone Accessories in Iju-Ishaga, Lagos \| O-BEST"/);
+  assert.match(html, /<meta name="twitter:title" content="Phone Accessories in Iju-Ishaga, Lagos \| O-BEST"/);
+  assert.match(html, /At O-BEST in Iju-Ishaga, explore phone accessories, charging, audio and selected phone parts/);
+});
+
+test("item request offers an optional user-sent WhatsApp draft with privacy disclosure", () => {
+  const root = path.resolve(__dirname, "..");
+  const request = fs.readFileSync(path.join(root, "request.html"), "utf8");
+  const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const privacy = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
+  assert.match(request, /href="https:\/\/wa\.me\/2348105463451\?text=/);
+  assert.match(request, /target="_blank" rel="noopener noreferrer">Continue on WhatsApp/);
+  assert.match(request, /Nothing is sent until you choose to send it in WhatsApp/);
+  assert.match(app, /const updateWhatsappRequestLink = \(\) =>/);
+  assert.match(app, /`Item: \$\{item\}`/);
+  assert.match(app, /`Device\/model: \$\{model\}`/);
+  assert.match(app, /`Details: \$\{details\}`/);
+  assert.match(app, /encodeURIComponent\(message\)/);
+  assert.match(privacy, /If you choose WhatsApp/);
+  assert.match(privacy, /shared with WhatsApp\/Meta and the O-BEST shop account/);
+});
+
 test("catalogue API only returns normalized public fields and safe Sanity images", () => {
   const product = normalizeProduct({
     id: "usb-c-cable",
@@ -221,7 +247,10 @@ test("Lucent screen review cards are research-only and use linked supplier photo
     assert.equal(screen.itemType, "phone-screens");
     assert.ok(screen.image.startsWith("https://www.lucentparts.com/wp-content/uploads/"));
     assert.equal(screen.photoSource, screen.source);
-    assert.match(screen.description, /not confirmed|not confirmed\./i);
+    assert.match(screen.description, /Lucent Parts lists this screen assembly/i);
+    assert.match(screen.description, /Availability is not confirmed\./);
+    assert.match(screen.imageAlt, /^Lucent supplier photo/);
+    assert.doesNotMatch(screen.imageAlt, /Unverified/i);
   }
   const unresolvedNote3Mini = lucentScreens.find(screen => /note-3-mini/.test(screen.id));
   assert.ok(unresolvedNote3Mini, "show the Lucent-listed Note 3 Mini entry the user requested");
@@ -231,7 +260,8 @@ test("Lucent screen review cards are research-only and use linked supplier photo
   const styles = fs.readFileSync(path.resolve(__dirname, "..", "styles.css"), "utf8");
   assert.match(api, /req\.method !== "GET"/);
   assert.match(api, /Use GET to read the Lucent research screen list/);
-  assert.match(app, /Supplier photo · unverified/);
+  assert.match(app, /Lucent supplier photo/);
+  assert.doesNotMatch(app, /Supplier photo · unverified|Unverified supplier reference image|Research candidate only—not confirmed shop stock or verified fit/);
   assert.match(styles, /\.product-art--research \.product-photo/);
   assert.match(styles, /\.research-photo-label/);
 });
