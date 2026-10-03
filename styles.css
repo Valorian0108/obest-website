@@ -357,12 +357,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 }
 @media(max-width:360px){.category-grid{gap:8px}.category-grid>.category-card,.category-grid>.category-card:nth-child(n){min-height:158px;padding:13px 11px}.category-grid>.category-card:nth-child(1),.category-grid>.category-card:nth-child(4){min-height:150px}.category-index{font-size:8px;letter-spacing:.1em}.category-card-copy strong{font-size:17px}}
 
-/* Research photos share a neutral field and identify their source status in-card. */
+/* Research photos share a neutral field without covering the product image. */
 .product-art--research{background:#f2f4f3;border:1px solid #e1e6e4}
 .product-art--research .product-photo{padding:22px;background:#f2f4f3;mix-blend-mode:multiply}
-.research-photo-label{position:absolute;left:12px;bottom:12px;z-index:2;padding:7px 9px;background:rgba(255,255,255,.94);border:1px solid #d7e0dd;color:#425c66;font:800 9px/1.2 var(--font-body);letter-spacing:.035em}
-.detail-art-wrap .research-photo-label{left:16px;bottom:16px;padding:9px 11px;font-size:10px}
-@media(max-width:760px){.product-art--research .product-photo{padding:16px}.research-photo-label{left:8px;bottom:8px;padding:6px 7px;font-size:8px}.detail-art-wrap .research-photo-label{left:12px;bottom:12px}}
+@media(max-width:760px){.product-art--research .product-photo{padding:16px}}
 
 /* Orbiting circle motif: the disc masks the rings as they pulse inward. */
 .orbit-doodle{isolation:isolate;background:transparent}
@@ -405,3 +403,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
 /* Keep below-the-fold content discoverable on phones even if scroll reveal is delayed. */
 @media(max-width:760px){.motion-ready main>section:not(.hero){opacity:1;transform:none}.header-cta{min-height:44px}.filter-chip,.catalog-brand-chips .filter-chip{height:44px}}
+
+/* Keep narrow product pages within the phone viewport, even with long model names. */
+html,body{overflow-x:clip}
+@media(max-width:760px){
+  .product-detail,.product-detail>*,.detail-copy,.detail-art-wrap{min-width:0}
+  .detail-copy h1{min-width:0;overflow-wrap:anywhere}
+  .detail-specs>div{display:grid;grid-template-columns:minmax(4.25rem,.35fr) minmax(0,1fr);align-items:start;gap:12px;min-width:0}
+  .detail-specs dt,.detail-specs dd{min-width:0;overflow-wrap:anywhere}
+  .detail-specs dd{text-align:right}
+  .detail-art-wrap .product-art--photo{width:100%;height:auto;max-height:420px;aspect-ratio:1/1}
+  .detail-art-wrap .product-photo{padding:16px}
+}

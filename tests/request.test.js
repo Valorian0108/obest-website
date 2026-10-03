@@ -106,6 +106,15 @@ test("all site pages use the O-BEST browser-tab favicon", () => {
   assert.match(icon, /fill="#063b82"/);
 });
 
+test("mobile product details wrap long values and keep product art within the viewport", () => {
+  const styles = fs.readFileSync(path.resolve(__dirname, "..", "styles.css"), "utf8");
+  assert.match(styles, /html,body\{overflow-x:clip\}/, "the document should clip accidental horizontal overflow at the root");
+  assert.match(styles, /@media\(max-width:760px\)\{[\s\S]*?\.detail-specs>div\{display:grid;grid-template-columns:minmax\(4\.25rem,\.35fr\) minmax\(0,1fr\)/, "mobile product specs should use bounded label and value tracks");
+  assert.match(styles, /\.detail-specs dt,\.detail-specs dd\{min-width:0;overflow-wrap:anywhere\}/, "long model and detail values should wrap instead of widening the row");
+  assert.match(styles, /\.detail-art-wrap \.product-art--photo\{width:100%;height:auto;max-height:420px;aspect-ratio:1\/1\}/, "mobile product images should scale to a bounded square");
+  assert.match(styles, /\.product-detail,\.product-detail>\*,\.detail-copy,\.detail-art-wrap\{min-width:0\}/, "the product grid and its children should be shrinkable");
+});
+
 test("homepage search metadata targets O-BEST's confirmed Iju-Ishaga shop and real offer", () => {
   const html = fs.readFileSync(path.resolve(__dirname, "..", "index.html"), "utf8");
   assert.match(html, /<title>Phone Accessories in Iju-Ishaga, Lagos \| O-BEST<\/title>/);
