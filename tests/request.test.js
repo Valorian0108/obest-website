@@ -247,14 +247,13 @@ test("Lucent screen review cards are research-only and use linked supplier photo
     assert.equal(screen.itemType, "phone-screens");
     assert.ok(screen.image.startsWith("https://www.lucentparts.com/wp-content/uploads/"));
     assert.equal(screen.photoSource, screen.source);
-    assert.match(screen.description, /Lucent Parts lists this screen assembly/i);
-    assert.match(screen.description, /Availability is not confirmed\./);
+    assert.match(screen.description, new RegExp(`^Replacement screen assembly labelled for ${screen.brand} ${screen.model}\\. Confirm the full handset model before fitting\\.`));
     assert.match(screen.imageAlt, /^Lucent supplier photo/);
     assert.doesNotMatch(screen.imageAlt, /Unverified/i);
   }
   const unresolvedNote3Mini = lucentScreens.find(screen => /note-3-mini/.test(screen.id));
   assert.ok(unresolvedNote3Mini, "show the Lucent-listed Note 3 Mini entry the user requested");
-  assert.match(unresolvedNote3Mini.description, /Hold: an official Samsung Galaxy Note 3 Mini phone model was not established/);
+  assert.match(unresolvedNote3Mini.description, /Listing remains on hold; do not treat as equivalent to Samsung Galaxy Note 3 Neo without part evidence/);
   const api = fs.readFileSync(path.resolve(__dirname, "..", "api", "lucent-screens.js"), "utf8");
   const app = fs.readFileSync(path.resolve(__dirname, "..", "app.js"), "utf8");
   const styles = fs.readFileSync(path.resolve(__dirname, "..", "styles.css"), "utf8");
