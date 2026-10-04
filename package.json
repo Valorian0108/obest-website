@@ -5,6 +5,7 @@
   "description": "Static O-BEST Link Communication catalogue with a Vercel inquiry function.",
   "scripts": {
     "test": "node --test tests/*.test.js sanity/schemas/*.test.cjs",
+    "check": "node --check app.js && node --check catalog-data.js && node --check api/catalogue.js && node --check api/product.js && node --check api/lucent-screens.js && node --check api/request.js",
     "studio": "sanity dev --port 3333",
     "studio:build": "sanity build",
     "catalogue:import:dry-run": "sanity exec sanity/scripts/migrate-products.ts -- --dry-run",
