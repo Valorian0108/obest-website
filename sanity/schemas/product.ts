@@ -76,23 +76,34 @@ export const product = defineType({
       name: "slug",
       title: "URL ID",
       type: "slug",
-      description: "Used in the product URL. Keep this unique and do not change it after publishing unless needed.",
+      description: "Generated from the product name. Must be unique. Keep the URL ID unchanged after publishing where possible.",
       options: {
         source: "name",
-        maxLength: 96,
+        maxLength: 128,
+        isUnique: async (value, context) => {
+          const client = context.getClient({ apiVersion: "2025-01-01" });
+          const documentId = context.document?._id?.replace(/^drafts\./, "") || "";
+          const duplicate = await client.fetch(
+            '*[_type == "product" && slug.current == $slug && !(_id in $ids)][0]._id',
+            { slug: value, ids: [documentId, `drafts.${documentId}`] },
+          );
+          return !duplicate;
+        },
         slugify: (input) => input
           .normalize("NFKD")
           .toLowerCase()
           .replace(/[\u0300-\u036f]/g, "")
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-|-$/g, "")
-          .slice(0, 96),
+          .slice(0, 128),
       },
       validation: (Rule) => Rule.required().custom((value) => {
         if (!value?.current) return true;
-        return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value.current)
-          ? true
-          : "Use lowercase letters, numbers and hyphens for the product URL ID.";
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value.current)) {
+          return "Use lowercase letters, numbers and hyphens for the product URL ID.";
+        }
+        if (value.current.length > 128) return "Keep the product URL ID to 128 characters or fewer.";
+        return true;
       }),
     }),
     defineField({
@@ -183,8 +194,20 @@ export const product = defineType({
   preview: {
     select: {
       title: "name",
-      subtitle: "availability",
+      category: "category",
+      itemType: "itemType",
+      availability: "availability",
       media: "image",
+    },
+    prepare({ title, category, itemType, availability, media }) {
+      const categoryTitle = categories.find((option) => option.value === category)?.title || "Uncategorized";
+      const itemTypeTitle = itemTypes.find((option) => option.value === itemType)?.title || "Type not set";
+      const availabilityTitle = availabilityOptions.find((option) => option.value === availability)?.title || "Ask us to check";
+      return {
+        title: title || "Untitled product",
+        subtitle: `${categoryTitle} · ${itemTypeTitle} · ${availabilityTitle}`,
+        media,
+      };
     },
   },
 });

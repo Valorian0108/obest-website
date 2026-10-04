@@ -199,7 +199,7 @@ An AI coding assistant can inspect the repository and understand:
 # PHASE 3 — PRODUCT MANAGEMENT WORKFLOW
 
 ### Status
-`AFTER PHASE 2`
+`IN PROGRESS`
 
 ### Objective
 
@@ -224,6 +224,14 @@ Sanity Studio
 6. Ensure unpublished products do not accidentally appear publicly.
 7. Ensure product changes propagate correctly.
 8. Document the product publishing workflow.
+
+### Progress (4 October 2026)
+
+- Audited the existing schema and Studio layout. Required listing fields, category/type validation, default `Ask us to check` availability, category grouping, and image alt-text support already exist.
+- Improved Studio list previews to show product name, category, product type, and availability.
+- Increased the Studio slug input limit to 128 characters to match the public route and added a uniqueness check against published and draft Sanity products.
+- Added regression tests for the Studio preview and slug safeguards. `npm run check` and all 56 tests pass.
+- Remaining: complete a successful local Studio build and owner-facing Preview review of create/edit/publish, image handling, unique slug behavior, unpublished exclusion, and propagation. No live Sanity documents were changed as part of this work.
 
 ### Definition of done
 
@@ -416,9 +424,12 @@ The immediate priority is:
 
 - Added `OBEST-ARCHITECTURE.md` describing system boundaries, data flows, operational ownership, local checks, and deployment safety rules.
 - Added `npm run check` and GitHub Actions CI for Node 20 syntax checks and the existing automated suite on pull requests and review-branch pushes.
-- Remaining Phase 2 work: validate CI on GitHub, review whether the existing `app.js` responsibilities need a small safe separation, and confirm docs cover production operations and AI contribution constraints without conflicting with the existing project roadmap.
+- GitHub Actions passed for commit `45f68b0` on `mobile-parity-review`; the owner confirmed its CI and Preview checks passed.
+- Reviewed `app.js` (483 lines). Keep it as one page-aware script for now: the catalogue and product-detail views share rendering helpers, and splitting them would add boundaries without a demonstrated safety benefit. Removed one obsolete catalogue-batch comment that no longer described the Sanity-authoritative runtime.
+- Reviewed `OBEST-ARCHITECTURE.md`, `README.md`, and `BUILD-ROADMAP.md` against the actual routes, scripts, and protection constraints. The engineering roadmap remains the AI change-control source; the older build roadmap tracks separate business/launch phases.
+- Phase 2 complete: project structure, data/API locations, secrets boundaries, deployment constraints, checks, ownership, and AI change-control rules are documented; the repeatable local checks and CI are passing. No framework or hosting changes were made.
 
-Do not begin the UI redesign, SEO expansion, or advertising work until Phase 2 is complete.
+Phase 3 may begin next: review and improve the Sanity product-entry workflow without broadening the public catalogue beyond owner-approved intent. Do not begin the UI redesign, SEO expansion, or advertising work ahead of their roadmap phases.
 
 ---
 

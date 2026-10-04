@@ -233,7 +233,6 @@
       { id: "parts", name: "Phone parts", description: "Screens and phone repair parts", icon: "screenpart", types: ["phone-screens", "power-flex"] }
     ];
     const typeIcons = { "power-banks": "bank", chargers: "charger", cables: "cable", earbuds: "earbuds", headphones: "headphones", mice: "mouse", smartwatches: "watch", fans: "fan", cookers: "cooker", "vacuum-cleaners": "vacuum", "phone-screens": "screenpart", "power-flex": "flex" };
-    // Batch 1 is approved; batch 2 is now open for the next owner review.
     const startCatalog = catalogueProducts => {
     detachCatalogListeners();
     const products = (catalogueProducts || []).filter(product => product && typeof product.id === "string" && typeof product.name === "string");

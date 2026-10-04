@@ -51,6 +51,24 @@ test("the CMS keeps the site's catalogue taxonomy and availability choices", () 
   assert.equal(batchOne.length, 20, "the current owner-approved batch stays marked separately from the review backlog");
 });
 
+test("Studio product previews identify category, type, and availability", () => {
+  const schema = fs.readFileSync(path.join(__dirname, "product.ts"), "utf8");
+  assert.match(schema, /category: "category"/);
+  assert.match(schema, /itemType: "itemType"/);
+  assert.match(schema, /availability: "availability"/);
+  assert.match(schema, /subtitle: `\$\{categoryTitle\} · \$\{itemTypeTitle\} · \$\{availabilityTitle\}`/);
+  assert.match(schema, /title: title \|\| "Untitled product"/);
+});
+
+test("product slugs match public route limits and check uniqueness in Sanity Studio", () => {
+  const schema = fs.readFileSync(path.join(__dirname, "product.ts"), "utf8");
+  assert.match(schema, /maxLength: 128/);
+  assert.match(schema, /\.slice\(0, 128\)/);
+  assert.match(schema, /isUnique: async \(value, context\)/);
+  assert.match(schema, /\*\[_type == "product" && slug\.current == \$slug && !\(_id in \$ids\)\]\[0\]\._id/);
+  assert.match(schema, /Keep the product URL ID to 128 characters or fewer/);
+});
+
 test("Sanity integration is configured for the owner project and production dataset", () => {
   const config = fs.readFileSync(path.join(root, "sanity.config.ts"), "utf8");
   const cliConfig = fs.readFileSync(path.join(root, "sanity.cli.ts"), "utf8");

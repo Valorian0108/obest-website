@@ -15,6 +15,8 @@ This guide describes the current implementation. It complements `README.md` (pro
 | Hosting and routing | Vercel project configuration | `vercel.json` and Vercel dashboard | Deployment configuration and Production changes are owner-controlled. A branch push may create Preview; it is not permission to deploy Production. |
 | CMS editor | Sanity project and schema | `sanity/`, `sanity.config.ts`, hosted Studio | Schema and project integration are code-owned; product content is managed in Studio. Never commit credentials. |
 
+The product editor requires the core listing fields, generates a URL ID from the product name, checks slug uniqueness in Studio, caps it at the public route limit of 128 characters, defaults new availability to “Ask us to check,” and groups documents by category. Studio list previews identify each product by name, category, product type, and availability. Optional specifications and source links should be added only when confirmed.
+
 ## Request/data flows
 
 - **Shop catalogue:** page loads `catalog-data.js` → same-origin `GET /api/catalogue` → published Sanity products are normalized → browser renders categories and products. Empty results remain empty. API failure displays an unavailable state; there is no `products.js` fallback.
@@ -33,6 +35,8 @@ npm test
 ```
 
 `npm run check` performs syntax checks on the customer-facing and API JavaScript. `npm test` runs Node's built-in test runner over `tests/*.test.js` and Sanity schema tests. GitHub Actions runs both checks after dependency installation for pull requests and pushes to `mobile-parity-review`.
+
+`app.js` remains a single page-aware browser script. It is 483 lines and currently shares rendering helpers between the catalogue and product-detail views; a file split was reviewed and deferred because it would add script/module boundaries without a demonstrated maintenance or behavior-safety benefit. Revisit if those responsibilities become independently testable or are changed frequently enough to justify the added boundaries.
 
 For Vercel Functions, rewrites, headers, and Preview-like behavior, use the existing Vercel development workflow (`vercel dev`) with the correct locally configured environment. Opening HTML directly from disk cannot exercise API routes. Do not add real inquiry secrets to local files or commit them.
 
