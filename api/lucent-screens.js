@@ -1,4 +1,4 @@
-const screens = require("./lucent-screen-research.json");
+const screens = require("./lucent-screen-research.json").filter(screen => !/note-3-mini/i.test(screen.id));
 
 module.exports = function lucentScreensHandler(req, res) {
   res.setHeader("Content-Type", "application/json; charset=utf-8");

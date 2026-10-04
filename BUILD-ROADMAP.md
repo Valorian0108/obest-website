@@ -10,6 +10,8 @@ Build a trustworthy catalogue and customer-support site first. Treat educational
 
 ## Current state
 
+- **Engineering roadmap status (4 October 2026):** Phase 1 is in progress. Public homepage, catalogue, and product-detail runtime now uses published Sanity products via `/api/catalogue`; `products.js` is no longer loaded by customer pages and remains only as a migration/test fixture. The public catalogue API currently queries up to 300 published records. The separately held Samsung Galaxy Note 3 Mini research entry is excluded from both the research feed and direct product-page lookup.
+
 - **Prototype built:** static, dependency-free pages for Home, category-first Catalogue, product details, Request an item, About & Visit, Privacy, and a Guides hub with one owner-approved, publicly visible general charging-accessory checklist.
 - **Catalogue:** `products.js` contains 130 records (20 batch 1 and 110 batch 2), all currently visible. The owner explicitly approved the current visible catalogue/listings on 2 October 2026, including the 102 records added after the earlier 20 + 8 review. Product images are local assets. Taller photos now have more display space so packaging details are easier to read.
 - **Homepage photography:** the hero rotates through selected owner-supplied accessory/product photos, centered without an added card or labels and spaced above the yellow band. The owner approved the current website details; include the final composition in visual sign-off before launch.

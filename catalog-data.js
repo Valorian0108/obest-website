@@ -11,10 +11,10 @@
     if (!response.ok) throw new Error(`Catalogue service responded with ${response.status}.`);
     const payload = await response.json();
     if (!Array.isArray(payload.result)) throw new Error("Catalogue service returned an invalid product list.");
-    return payload.result.length ? payload.result : window.OBEST_PRODUCTS || [];
+    return payload.result;
   }).catch(error => {
-    console.warn("Sanity catalogue unavailable; keeping the bundled catalogue.", error);
-    return window.OBEST_PRODUCTS || [];
+    console.warn("Sanity catalogue unavailable.", error);
+    throw error;
   });
 
   const researchRequest = fetch(researchEndpoint, {
@@ -37,11 +37,5 @@
     ...researchScreens.filter(screen => !products.some(product => product.id === screen.id)),
   ]);
 
-  window.OBEST_PRODUCTS_REFRESH = window.OBEST_PRODUCTS_READY.then(products => {
-    window.OBEST_PRODUCTS = products;
-    return products;
-  }).catch(error => {
-    // Preserve a rejected refresh signal if the bundled catalogue is also unavailable.
-    throw error;
-  });
+  window.OBEST_PRODUCTS_REFRESH = window.OBEST_PRODUCTS_READY;
 })();

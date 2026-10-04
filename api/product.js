@@ -6,7 +6,7 @@ const {
   PROJECT_ID,
   normalizeProduct,
 } = require("./catalogue.js");
-const researchScreens = require("./lucent-screen-research.json");
+const researchScreens = require("./lucent-screen-research.json").filter(screen => !/note-3-mini/i.test(screen.id));
 
 const SITE_ORIGIN = "https://www.obestlink.com";
 const FALLBACK_IMAGE = `${SITE_ORIGIN}/assets/homepage/rgb-wireless-mouse.jpg`;
@@ -89,7 +89,7 @@ function createHandler({
     }
 
     const id = typeof req.query?.id === "string" ? req.query.id : "";
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id) || id.length > 96) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id) || id.length > 128) {
       res.setHeader("Cache-Control", "no-store");
       return res.status(404).send("Product not found.");
     }

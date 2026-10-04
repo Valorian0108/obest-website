@@ -52,7 +52,7 @@ function safeLink(value) {
 
 function normalizeProduct(product) {
   if (!product || typeof product !== "object") return null;
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(text(product.id, 96))) return null;
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(text(product.id, 128))) return null;
   if (!text(product.name, 160) || !text(product.description, 600)) return null;
   if (!CATEGORY_NAMES[product.category] || !ITEM_TYPES.has(product.itemType)) return null;
 
@@ -63,7 +63,7 @@ function normalizeProduct(product) {
     ? image
     : "";
   return {
-    id: text(product.id, 96),
+    id: text(product.id, 128),
     name: text(product.name, 160),
     category: product.category,
     categoryName: CATEGORY_NAMES[product.category],

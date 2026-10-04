@@ -185,6 +185,20 @@
   const grid = document.getElementById("product-grid");
   const categoryGrid = document.getElementById("category-grid");
   if (grid && categoryGrid) {
+    const search = document.getElementById("product-search");
+    const backButton = document.getElementById("category-back");
+    const brandFilter = document.getElementById("brand-filter");
+    const resultCount = document.getElementById("result-count");
+    const emptyResults = document.getElementById("empty-results");
+    const renderCatalogLoading = () => {
+      categoryGrid.hidden = true;
+      grid.hidden = true;
+      brandFilter.hidden = true;
+      backButton.hidden = true;
+      emptyResults.hidden = false;
+      emptyResults.innerHTML = '<span class="spark-icon" aria-hidden="true"></span><h2>Loading the catalogue…</h2><p>Please wait while we fetch the latest listings.</p>';
+      resultCount.textContent = "Loading catalogue";
+    };
     const renderCatalogUnavailable = () => {
       categoryGrid.hidden = true;
       grid.hidden = true;
@@ -194,11 +208,6 @@
       emptyResults.innerHTML = `<span class="spark-icon" aria-hidden="true"></span><h2>Catalogue temporarily unavailable.</h2><p>Please try again shortly or contact the shop to ask about an item.</p><a class="button button-blue" href="request.html">Contact the shop</a>`;
       resultCount.textContent = "Catalogue unavailable";
     };
-    const search = document.getElementById("product-search");
-    const backButton = document.getElementById("category-back");
-    const brandFilter = document.getElementById("brand-filter");
-    const resultCount = document.getElementById("result-count");
-    const emptyResults = document.getElementById("empty-results");
     const normalizeSearch = value => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
     const productMatchesSearch = (product, term) => {
       const searchableFields = [
@@ -365,14 +374,11 @@
     };
     render();
     };
-    const catalogueReady = window.OBEST_PRODUCTS_READY;
-    startCatalog(window.OBEST_PRODUCTS || []);
-    if (catalogueReady && typeof catalogueReady.then === "function") {
-      catalogueReady.then(startCatalog).catch(error => {
-        console.error("Unable to load the O-BEST product catalogue.", error);
-        if (!window.OBEST_PRODUCTS?.length) renderCatalogUnavailable();
-      });
-    }
+    renderCatalogLoading();
+    window.OBEST_PRODUCTS_READY.then(startCatalog).catch(error => {
+      console.error("Unable to load the O-BEST product catalogue.", error);
+      renderCatalogUnavailable();
+    });
   }
 
   const detail = document.getElementById("product-detail");
@@ -410,14 +416,11 @@
       }
     }
     };
-    const catalogueReady = window.OBEST_PRODUCTS_READY;
-    renderDetail(window.OBEST_PRODUCTS || []);
-    if (catalogueReady && typeof catalogueReady.then === "function") {
-      catalogueReady.then(renderDetail).catch(error => {
-        console.error("Unable to load the O-BEST product details.", error);
-        if (!window.OBEST_PRODUCTS?.length) detail.innerHTML = `<div class="not-found"><span class="spark-icon" aria-hidden="true"></span><h1>Product details are temporarily unavailable.</h1><p>Please try again shortly or ask the shop about this item.</p><a class="button button-blue" href="catalog.html">Browse catalogue</a></div>`;
-      });
-    }
+    detail.innerHTML = `<div class="not-found"><h1>Loading product details…</h1><p>Please wait while we fetch the latest listing.</p></div>`;
+    window.OBEST_PRODUCTS_READY.then(renderDetail).catch(error => {
+      console.error("Unable to load the O-BEST product details.", error);
+      detail.innerHTML = `<div class="not-found"><span class="spark-icon" aria-hidden="true"></span><h1>Product details are temporarily unavailable.</h1><p>Please try again shortly or ask the shop about this item.</p><a class="button button-blue" href="catalog.html">Browse catalogue</a></div>`;
+    });
   }
 
   const requestForm = document.getElementById("request-form");

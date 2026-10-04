@@ -163,6 +163,8 @@ test("catalogue API only returns normalized public fields and safe Sanity images
   assert.equal(normalizeProduct({ ...product, image: "https://cdn.sanity.io/images/another-project/production/example.jpg" }).image, "");
   assert.equal(normalizeProduct({ ...product, availability: "delete-all" }).availability, "check");
   assert.equal(normalizeProduct({ ...product, id: "bad/id" }), null);
+  const longId = `sanity-product-${"x".repeat(100)}`;
+  assert.equal(normalizeProduct({ ...product, id: longId }).id, longId, "published Sanity slugs up to the route limit should normalize");
 });
 
 test("catalogue API is read-only and does not claim success when Sanity is unavailable", async () => {
@@ -187,42 +189,50 @@ test("catalogue API is read-only and does not claim success when Sanity is unava
   await unavailable({ method: "GET" }, failedResponse);
   assert.equal(failedResponse.statusCode, 503);
   assert.deepEqual(failedResponse.body, { message: "The product catalogue is temporarily unavailable." });
+
+  const emptyCatalogue = createCatalogueHandler({ fetchImpl: async () => ({ ok: true, json: async () => ({ result: [] }) }) });
+  const emptyResponse = mockResponse();
+  await emptyCatalogue({ method: "GET" }, emptyResponse);
+  assert.equal(emptyResponse.statusCode, 200);
+  assert.deepEqual(emptyResponse.body, { result: [] }, "an empty Sanity response stays empty and never falls back to products.js");
 });
 
-test("catalogue and detail pages retain the bundled catalogue as a safe CMS fallback", () => {
+test("all product-facing pages load the Sanity catalogue without loading products.js", () => {
   const root = path.resolve(__dirname, "..");
   const home = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const catalog = fs.readFileSync(path.join(root, "catalog.html"), "utf8");
   const product = fs.readFileSync(path.join(root, "product.html"), "utf8");
-  assert.match(home, /<script src="products\.js"><\/script>/, "homepage remains on the current catalogue source");
-  assert.match(catalog, /<script src="products\.js"><\/script>\s*<script src="catalog-data\.js"><\/script>/);
-  assert.match(product, /<script src="products\.js"><\/script>\s*<script src="catalog-data\.js"><\/script>/);
+  for (const [name, html] of [["homepage", home], ["catalogue", catalog], ["product detail", product]]) {
+    assert.match(html, /<script src="catalog-data\.js"><\/script>/, `${name} loads the Sanity catalogue`);
+    assert.doesNotMatch(html, /<script src="products\.js"><\/script>/, `${name} does not load the legacy product array`);
+  }
   assert.ok(fs.existsSync(path.join(root, "api", "catalogue.js")), "catalogue is served by the standard Vercel API route");
 });
 
-test("catalogue and product pages render bundled data before the catalogue API settles", () => {
+test("catalogue and product pages render only after Sanity responds and show errors safely", () => {
   const root = path.resolve(__dirname, "..");
   const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
   const catalogBlock = app.slice(app.indexOf("const startCatalog ="), app.indexOf("const detail ="));
   const detailBlock = app.slice(app.indexOf("const renderDetail ="), app.indexOf("const requestForm ="));
-  assert.ok(catalogBlock.indexOf("startCatalog(window.OBEST_PRODUCTS || [])") < catalogBlock.indexOf("catalogueReady.then(startCatalog)"), "catalogue should render bundled data before awaiting the API response");
-  assert.ok(detailBlock.indexOf("renderDetail(window.OBEST_PRODUCTS || [])") < detailBlock.indexOf("catalogueReady.then(renderDetail)"), "product details should render bundled data before awaiting the API response");
+  assert.match(catalogBlock, /renderCatalogLoading\(\);\s*window\.OBEST_PRODUCTS_READY\.then\(startCatalog\)\.catch\(error => \{[\s\S]*renderCatalogUnavailable\(\);/);
+  assert.doesNotMatch(catalogBlock, /startCatalog\(window\.OBEST_PRODUCTS/);
+  assert.match(detailBlock, /window\.OBEST_PRODUCTS_READY\.then\(renderDetail\)\.catch\(error => \{[\s\S]*Product details are temporarily unavailable/);
+  assert.doesNotMatch(detailBlock, /renderDetail\(window\.OBEST_PRODUCTS/);
   assert.match(catalogBlock, /detachCatalogListeners\(\);[\s\S]*removeEventListener\("click", onCategoryClick\)/, "refreshing catalogue data should not duplicate event handlers");
   assert.match(detailBlock, /detailImage\.setAttribute\("fetchpriority", "high"\)/, "the early product render should continue to prioritize its primary image");
 });
 
-test("catalogue data refreshes the bundled list after the API resolves and safely falls back on errors", async () => {
+test("catalogue data uses Sanity as its only product source and treats Sanity failures as unavailable", async () => {
   const source = fs.readFileSync(require.resolve("../catalog-data.js"), "utf8");
   const bundled = [{ id: "bundled", name: "Bundled item" }];
   const resolvers = [];
   const context = {
-    window: { OBEST_PRODUCTS: bundled },
+    window: {},
     fetch: () => new Promise(resolve => { resolvers.push(resolve); }),
     AbortSignal: { timeout: () => ({}) },
     console: { warn() {} },
   };
   vm.runInNewContext(source, context);
-  assert.deepEqual(context.window.OBEST_PRODUCTS, bundled, "bundled data should remain available during the API request");
   assert.equal(resolvers.length, 2, "shop catalogue and research list should load independently");
   resolvers[0]({ ok: true, json: async () => ({ result: [{ id: "fresh", name: "Fresh item" }] }) });
   resolvers[1]({ ok: true, json: async () => ({ result: [{ id: "research", name: "Research item", image: "https://example.org/screen.webp" }] }) });
@@ -231,10 +241,10 @@ test("catalogue data refreshes the bundled list after the API resolves and safel
   assert.equal(refreshed[1].id, "research");
   assert.equal(refreshed[1].researchImage, "https://example.org/screen.webp");
   assert.equal(refreshed[1].researchListing, true);
-  assert.equal(context.window.OBEST_PRODUCTS[0].id, "fresh");
+  assert.equal(context.window.OBEST_PRODUCTS, undefined, "Sanity records should not be copied into a legacy global");
 
   const partialContext = {
-    window: { OBEST_PRODUCTS: bundled },
+    window: {},
     fetch: async url => url === "/api/catalogue"
       ? { ok: true, json: async () => ({ result: [{ id: "fresh", name: "Fresh item" }] }) }
       : { ok: false, status: 503 },
@@ -244,16 +254,27 @@ test("catalogue data refreshes the bundled list after the API resolves and safel
   vm.runInNewContext(source, partialContext);
   assert.deepEqual(Array.from((await partialContext.window.OBEST_PRODUCTS_REFRESH).map(product => product.id)), ["fresh"], "shop inventory should remain available if research data fails");
 
+  const emptyContext = {
+    window: {},
+    fetch: async url => url === "/api/catalogue"
+      ? { ok: true, json: async () => ({ result: [] }) }
+      : { ok: true, json: async () => ({ result: [] }) },
+    AbortSignal: { timeout: () => ({}) },
+    console: { warn() {} },
+  };
+  vm.runInNewContext(source, emptyContext);
+  assert.deepEqual(Array.from(await emptyContext.window.OBEST_PRODUCTS_READY), [], "an empty Sanity catalogue must not revive products.js records");
+
   const failedContext = {
-    window: { OBEST_PRODUCTS: bundled },
+    window: {},
     fetch: async () => { throw new Error("offline"); },
     AbortSignal: { timeout: () => ({}) },
     console: { warn() {} },
   };
   vm.runInNewContext(source, failedContext);
-  const fallback = await failedContext.window.OBEST_PRODUCTS_REFRESH;
-  assert.equal(fallback[0].id, "bundled");
-  assert.equal(failedContext.window.OBEST_PRODUCTS[0].id, "bundled");
+  await assert.rejects(failedContext.window.OBEST_PRODUCTS_REFRESH, /offline/);
+  assert.equal(failedContext.window.OBEST_PRODUCTS, undefined, "Sanity outages must not show a stale products.js catalogue");
+  assert.equal(bundled[0].id, "bundled", "the legacy dataset fixture remains unchanged for migration checks");
 });
 
 test("Lucent screen review cards are research-only and use linked supplier photos", () => {
@@ -277,6 +298,7 @@ test("Lucent screen review cards are research-only and use linked supplier photo
   assert.ok(unresolvedNote3Mini, "show the Lucent-listed Note 3 Mini entry the user requested");
   assert.match(unresolvedNote3Mini.description, /Listing remains on hold; do not treat as equivalent to Samsung Galaxy Note 3 Neo without part evidence/);
   const api = fs.readFileSync(path.resolve(__dirname, "..", "api", "lucent-screens.js"), "utf8");
+  assert.match(api, /filter\(screen => !\/note-3-mini\/i\.test\(screen\.id\)\)/, "the publicly exposed research feed keeps the held Note 3 Mini excluded");
   const app = fs.readFileSync(path.resolve(__dirname, "..", "app.js"), "utf8");
   const styles = fs.readFileSync(path.resolve(__dirname, "..", "styles.css"), "utf8");
   assert.match(api, /req\.method !== "GET"/);
@@ -386,6 +408,16 @@ test("product page metadata falls back safely when Sanity is unavailable", async
   assert.match(res.body, /<title>Product details \| O-BEST<\/title>/);
   assert.doesNotMatch(res.body, /<link rel="canonical"/);
   assert.doesNotMatch(res.body, /property="og:url"/);
+});
+
+test("held Note 3 Mini research entry is not exposed as a direct product page", async () => {
+  const held = lucentScreens.find(screen => /note-3-mini/i.test(screen.id));
+  const handler = createProductPageHandler({ fetchImpl: async () => ({ ok: true, json: async () => ({ result: null }) }) });
+  const res = mockResponse();
+  res.send = function (body) { this.body = body; return this; };
+  await handler({ method: "GET", query: { id: held.id } }, res);
+  assert.equal(res.statusCode, 404);
+  assert.doesNotMatch(res.body, /Samsung Galaxy Note 3 Mini/);
 });
 
 test("published guides include the owner-approved charger checklist and safe loose-port advice", () => {
