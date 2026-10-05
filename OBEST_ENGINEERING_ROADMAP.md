@@ -231,7 +231,8 @@ Sanity Studio
 - Improved Studio list previews to show product name, category, product type, and availability.
 - Increased the Studio slug input limit to 128 characters to match the public route and added a uniqueness check against published and draft Sanity products.
 - Added regression tests for the Studio preview and slug safeguards. `npm run check` and all 56 tests pass.
-- Remaining: complete a successful local Studio build and owner-facing Preview review of create/edit/publish, image handling, unique slug behavior, unpublished exclusion, and propagation. No live Sanity documents were changed as part of this work.
+- The Studio schema deployed successfully to `https://obest-catalogue.sanity.studio/`; the owner confirmed existing slugs are accepted unchanged and duplicate slugs are flagged. No product documents were changed or published for this verification.
+- Remaining: owner-facing review of create/edit/publish workflow, image handling, unpublished-product exclusion, and change propagation. The local Studio build succeeded. Do not publish test content.
 
 ### Definition of done
 
