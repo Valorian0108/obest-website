@@ -628,7 +628,8 @@ test("home categories remain available on mobile without waiting for scroll reve
   assert.equal((categorySection.match(/class="category-card [^"]+"/g) || []).length, 6, "all six approved category links should be present");
   assert.match(styles, /\.category-grid\{grid-template-columns:repeat\(12,minmax\(0,1fr\)\)/, "desktop categories should use deliberate unequal spans");
   assert.match(styles, /@media\(max-width:760px\)\{\s*\.category-section\{[^}]+\}\s*\.category-section \.section-heading\{[^}]+\}\s*\.category-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/, "mobile categories should return to a clean two-column layout");
-  assert.match(styles, /@media\(max-width:760px\)\{\.topline-toggle\{opacity:1\}\}/, "the moving-brand pause button should remain discoverable without hover on phones");
+  assert.doesNotMatch(styles, /brand-ticker|topline-toggle|\.topline-track\{[^}]*animation\s*:/, "the top brand message should be static with no animation or pause control");
+  assert.doesNotMatch(home.match(/<div class="topline">[\s\S]*?<\/div>(?=<\/header>)/)?.[0] || "", /topline-toggle|aria-hidden="true"/, "the homepage should render one static brand message");
   assert.match(styles, /@media\(max-width:760px\)\{\.motion-ready main>section:not\(\.hero\)\{opacity:1;transform:none\}\.header-cta\{min-height:44px\}\.filter-chip,\.catalog-brand-chips \.filter-chip\{height:44px\}\}/, "phone layouts should keep sections visible and interactive controls comfortably tappable");
 });
 

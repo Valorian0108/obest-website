@@ -74,14 +74,6 @@
   });
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const prefersReducedMotion = reducedMotionQuery.matches;
-  const ticker = document.querySelector(".topline");
-  const tickerToggle = ticker?.querySelector(".topline-toggle");
-  tickerToggle?.addEventListener("click", () => {
-    const isPaused = ticker.classList.toggle("is-paused");
-    tickerToggle.setAttribute("aria-pressed", String(isPaused));
-    tickerToggle.setAttribute("aria-label", isPaused ? "Resume moving brand message" : "Pause moving brand message");
-  });
-
   let revealObserver = null;
   if (!prefersReducedMotion && "IntersectionObserver" in window) {
     document.documentElement.classList.add("motion-ready");
