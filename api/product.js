@@ -39,11 +39,16 @@ function escapeHtml(value) {
   })[character]);
 }
 
-function pageFor(product, template) {
-  const title = product ? `${product.name} | O-BEST` : "Product details | O-BEST";
-  const description = product
+function metaDescription(product) {
+  const fullDescription = product
     ? `${product.description} Ask O-BEST to check current availability and confirm exact model fit.`
     : "View product details from O-BEST Link Communication. Ask us to check current availability and confirm details for your device.";
+  return fullDescription.length <= 180 ? fullDescription : `${fullDescription.slice(0, 177).trimEnd()}...`;
+}
+
+function pageFor(product, template) {
+  const title = product ? `${product.name} | O-BEST` : "Product details | O-BEST";
+  const description = metaDescription(product);
   const canonical = product ? `${SITE_ORIGIN}/product/${encodeURIComponent(product.id)}` : "";
   const image = product?.image || product?.researchImage || FALLBACK_IMAGE;
   const imageAlt = product?.image || product?.researchImage ? (product.imageAlt || product.name) : "O-BEST Link Communication product selection";
@@ -59,6 +64,17 @@ function pageFor(product, template) {
     `<meta name="twitter:title" content="${escapeHtml(title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(description)}" />`,
     `<meta name="twitter:image" content="${escapeHtml(image)}" />`,
+    `<script type="application/ld+json">${JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      description: product.description,
+      url: canonical,
+      image: product.image || product.researchImage || undefined,
+      brand: product.brand ? { "@type": "Brand", name: product.brand } : undefined,
+      model: product.model || undefined,
+      category: product.categoryName || product.category,
+    }).replace(/</g, "\\u003c")}</script>`,
   ].join("");
   return template
     .replace("<title>Product details | O-BEST</title>", `<title>${escapeHtml(title)}</title>`)

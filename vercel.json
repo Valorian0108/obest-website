@@ -5,9 +5,16 @@
     },
     "api/lucent-screens.js": {
       "includeFiles": "api/lucent-screen-research.json"
+    },
+    "api/sitemap.js": {
+      "includeFiles": "api/lucent-screen-research.json"
     }
   },
   "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
     {
       "source": "/product/:id",
       "destination": "/api/product?id=:id"

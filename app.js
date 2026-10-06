@@ -74,37 +74,6 @@
   });
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const prefersReducedMotion = reducedMotionQuery.matches;
-  const heroGallery = document.querySelector("[data-hero-gallery]");
-  if (heroGallery) {
-    const slides = [...heroGallery.querySelectorAll(".hero-photo")];
-    const previousButton = document.querySelector("[data-gallery-previous]");
-    const nextButton = document.querySelector("[data-gallery-next]");
-    const count = document.querySelector("[data-gallery-count]");
-    let activeSlide = 0;
-
-    const loadSlide = slide => {
-      if (slide.dataset.loaded === "true") return slide.decode ? slide.decode().catch(() => null) : Promise.resolve();
-      if (slide.dataset.srcset) slide.srcset = slide.dataset.srcset;
-      if (slide.dataset.sizes) slide.sizes = slide.dataset.sizes;
-      if (slide.dataset.src) slide.src = slide.dataset.src;
-      slide.dataset.loaded = "true";
-      return slide.decode ? slide.decode().catch(() => null) : Promise.resolve();
-    };
-
-    const showSlide = index => {
-      slides.forEach((slide, slideIndex) => {
-        const isActive = slideIndex === index;
-        slide.classList.toggle("is-active", isActive);
-        slide.setAttribute("aria-hidden", String(!isActive));
-      });
-      activeSlide = index;
-      if (count) count.textContent = `${String(index + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
-      loadSlide(slides[index]);
-    };
-    previousButton?.addEventListener("click", () => showSlide((activeSlide - 1 + slides.length) % slides.length));
-    nextButton?.addEventListener("click", () => showSlide((activeSlide + 1) % slides.length));
-    loadSlide(slides[activeSlide]);
-  }
   const ticker = document.querySelector(".topline");
   const tickerToggle = ticker?.querySelector(".topline-toggle");
   tickerToggle?.addEventListener("click", () => {

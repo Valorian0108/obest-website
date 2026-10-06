@@ -6,6 +6,7 @@ const vm = require("node:vm");
 const { createHandler } = require("../api/request.js");
 const { createHandler: createCatalogueHandler, normalizeProduct } = require("../api/catalogue.js");
 const { createHandler: createProductPageHandler } = require("../api/product.js");
+const { createHandler: createSitemapHandler, STATIC_URLS } = require("../api/sitemap.js");
 const lucentScreens = require("../api/lucent-screen-research.json");
 
 const productsContext = {};
@@ -19,33 +20,35 @@ test("catalogue product IDs are unique and referenced images exist", () => {
   assert.deepEqual(missingImages.map(product => product.image), []);
 });
 
-test("homepage photo gallery keeps a steady lead image and defers visitor-selected slides", () => {
+test("homepage hero uses one responsive illustration without a rotating gallery", () => {
   const root = path.resolve(__dirname, "..");
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  const hero = html.match(/<div class="hero-photo-stage"[\s\S]*?<\/div>/)?.[0];
-  assert.ok(hero, "featured photo gallery should exist");
+  const hero = html.match(/<picture class="hero-photo-stage">([\s\S]*?)<\/picture>/)?.[1];
+  assert.ok(hero, "the hero should use a responsive picture element");
   const images = [...hero.matchAll(/<img\b([^>]*)>/g)].map(match => match[1]);
-  assert.equal(images.length, 14, "keep the approved featured photography available");
-  assert.equal(images.filter(image => /fetchpriority="high"/.test(image)).length, 1, "only the initial hero image should have high fetch priority");
-  assert.match(images[0], /srcset="[^"]+"/);
-  assert.match(images[0], /sizes="[^"]+"/);
-  assert.match(images[0], /width="800"\s+height="800"/);
-  for (const image of images.slice(1)) {
-    assert.match(image, /data-src="[^"]+"/, "noninitial slides should only request their image when activated");
-    assert.doesNotMatch(image, /\ssrc=/, "noninitial slides must not fetch before activation");
-    const localImage = image.match(/data-src="([^"]+)"/)[1];
-    assert.ok(fs.existsSync(path.join(root, localImage)), `${localImage} must exist`);
+  const sources = [...hero.matchAll(/<source\b([^>]*)>/g)].map(match => match[1]);
+  assert.equal(images.length, 1, "show exactly one homepage hero image");
+  assert.equal(sources.length, 2, "offer modern formats with a JPEG fallback");
+  assert.match(sources[0], /type="image\/avif"/);
+  assert.match(sources[1], /type="image\/webp"/);
+  for (const source of sources) {
+    assert.match(source, /srcset="[^"]+"/);
+    assert.match(source, /sizes="[^"]+"/);
+    for (const imagePath of source.match(/srcset="([^"]+)"/)[1].matchAll(/(?:^|,\s*)(\S+)/g)) {
+      assert.ok(fs.existsSync(path.join(root, imagePath[1])), `${imagePath[1]} must exist`);
+    }
   }
-  assert.match(html, /data-gallery-previous/);
-  assert.match(html, /data-gallery-next/);
-  assert.match(html, /data-gallery-count aria-live="polite"/);
+  assert.match(images[0], /src="assets\/homepage\/5b2bf1320031a265aa13b414ed625ef0\.jpg"/);
+  assert.match(images[0], /width="740"\s+height="495"/);
+  assert.match(images[0], /alt="AI-generated illustration of a person smiling and pointing at a smartphone"/);
+  assert.match(images[0], /fetchpriority="high"/);
+  assert.match(html, /og:image" content="https:\/\/www\.obestlink\.com\/assets\/homepage\/5b2bf1320031a265aa13b414ed625ef0\.jpg/);
+  assert.doesNotMatch(html, /data-gallery-|hero-photo-controls|\/ 14/);
+  const styles = fs.readFileSync(path.join(root, "styles.css"), "utf8");
+  assert.match(styles, /\.hero-photo-frame\{[^}]*aspect-ratio:740\/495[^}]*padding:10px/);
+  assert.match(styles, /\.hero-photo\{[^}]*object-fit:contain/);
   const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
-  assert.match(app, /const loadSlide = slide =>/);
-  assert.match(app, /loadSlide\(slides\[index\]\)/);
-  const galleryLogic = app.slice(app.indexOf("const heroGallery ="), app.indexOf("const ticker ="));
-  assert.match(galleryLogic, /previousButton\?\.addEventListener\("click"/);
-  assert.match(galleryLogic, /nextButton\?\.addEventListener\("click"/);
-  assert.doesNotMatch(galleryLogic, /setInterval|IntersectionObserver|visibilitychange/);
+  assert.doesNotMatch(app, /data-hero-gallery|data-gallery-previous|data-gallery-next|loadSlide|showSlide/);
 });
 
 test("product imagery reserves layout space and is promoted for product-page LCP", () => {
@@ -92,6 +95,18 @@ test("public stable pages use canonical URLs and specific social metadata", () =
   const product = fs.readFileSync(path.join(root, "product.html"), "utf8");
   assert.match(product, /<!-- PRODUCT_METADATA -->/, "the server response should inject per-product metadata into the shared shell");
   assert.doesNotMatch(product, /<link rel="canonical"/, "the unselected shared shell must not claim a product canonical URL");
+  for (const [file, canonical] of [
+    ["request.html", "https://www.obestlink.com/request.html"],
+    ["privacy.html", "https://www.obestlink.com/privacy.html"],
+  ]) {
+    const html = fs.readFileSync(path.join(root, file), "utf8");
+    assert.match(html, new RegExp(`<link rel="canonical" href="${canonical.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"\\s*/?>`), `${file} needs its actual canonical URL`);
+    assert.match(html, /<meta property="og:url" content="[^"]+"\s*\/>/, `${file} needs a canonical-matched social URL`);
+    assert.match(html, /<meta property="og:title" content="[^"]+"\s*\/>/, `${file} needs a page-specific social title`);
+    assert.match(html, /<meta property="og:description" content="[^"]+"\s*\/>/, `${file} needs a useful social description`);
+    assert.match(html, /<meta property="og:image" content="https:\/\/www\.obestlink\.com\/assets\/homepage\/[^"]+"\s*\/>/, `${file} needs an existing O-BEST social image`);
+    assert.match(html, /<meta name="twitter:card" content="summary_large_image"\s*\/>/);
+  }
 });
 
 test("all site pages use the O-BEST browser-tab favicon", () => {
@@ -363,9 +378,23 @@ test("product URLs render product-specific metadata in the initial HTML response
   assert.match(res.body, /<title>HP S1000 Plus Wireless Mouse \| O-BEST<\/title>/);
   assert.match(res.body, /<link rel="canonical" href="https:\/\/www\.obestlink\.com\/product\/hp-s1000-plus-mouse"\s*\/>/);
   assert.match(res.body, /<meta property="og:type" content="product"\s*\/>/);
+  const structuredData = res.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(structuredData, "the initial product HTML should include JSON-LD");
+  const productJsonLd = JSON.parse(structuredData);
+  assert.equal(productJsonLd["@context"], "https://schema.org");
+  assert.equal(productJsonLd["@type"], "Product");
+  assert.equal(productJsonLd.name, listed.name);
+  assert.equal(productJsonLd.url, "https://www.obestlink.com/product/hp-s1000-plus-mouse");
+  assert.equal(productJsonLd.brand.name, "HP");
+  assert.equal(productJsonLd.category, "Computing");
+  assert.equal("offers" in productJsonLd, false, "do not add unsupported price or availability claims");
+  assert.equal("aggregateRating" in productJsonLd, false, "do not invent product ratings");
+  assert.ok((res.body.match(/<meta name="description"/g) || []).length === 1, "emit one page-specific meta description");
+  assert.ok(res.body.match(/<meta name="description" content="([^"]*)"/)[1].length <= 180, "keep the product snippet concise");
   assert.equal([...res.body.matchAll(/property="og:type"/g)].length, 1, "the rendered product page should not duplicate its Open Graph type");
   assert.match(res.body, /<meta property="og:title" content="HP S1000 Plus Wireless Mouse \| O-BEST"\s*\/>/);
   assert.match(res.body, /<meta name="twitter:title" content="HP S1000 Plus Wireless Mouse \| O-BEST"\s*\/>/);
+  assert.doesNotMatch(res.body, /"offers"\s*:/, "never invent prices or availability offers");
   assert.match(res.body, /<meta property="og:image" content="https:\/\/www\.obestlink\.com\/assets\/homepage\/rgb-wireless-mouse\.jpg"\s*\/>/, "intentional no-photo products should use the general share image");
   assert.doesNotMatch(res.body, /PRODUCT_METADATA|__PRODUCT_/);
 });
@@ -388,6 +417,9 @@ test("product page metadata HTML-escapes catalogue text and returns 404 for unkn
   assert.doesNotMatch(res.body, /<title>Mouse <script>/);
   assert.match(res.body, /Wireless &amp; durable &quot;mouse&quot;/);
   assert.match(res.body, /cdn\.sanity\.io\/images\/ese1smjb\/production\/test-image\.jpg/);
+  const jsonLd = JSON.parse(res.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+  assert.equal(jsonLd.name, listed.name, "JSON-LD must remain valid even when content contains script-significant characters");
+  assert.doesNotMatch(res.body, /<script>alert\("x"\)<\/script>/);
 
   const missingHandler = createProductPageHandler({ fetchImpl: async () => ({ ok: true, json: async () => ({ result: null }) }) });
   const missing = mockResponse();
@@ -410,6 +442,63 @@ test("product page metadata falls back safely when Sanity is unavailable", async
   assert.doesNotMatch(res.body, /property="og:url"/);
 });
 
+test("dynamic sitemap lists valid published products, approved research routes, and stable pages", async () => {
+  const first = products.find(product => product.id === "hp-s1000-plus-mouse");
+  const second = products.find(product => product.id === "infinix-xpower-20");
+  const handler = createSitemapHandler({
+    fetchImpl: async url => {
+      assert.match(url.searchParams.get("query"), /!\(_id in path\("drafts\.\*\*"\)\)/);
+      return { ok: true, json: async () => ({ result: [first, second, { ...first, id: "bad slug" }, { ...first, id: "samsung-galaxy-note-3-mini-screen" }] }) };
+    },
+  });
+  const res = mockResponse();
+  res.send = function (body) { this.body = body; return this; };
+  await handler({ method: "GET" }, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.headers["Content-Type"], "application/xml; charset=utf-8");
+  assert.match(res.headers["Cache-Control"], /s-maxage=300/);
+  assert.match(res.body, /^<\?xml version="1\.0" encoding="UTF-8"\?>\s*<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
+  assert.match(res.body, /<\/urlset>\s*$/);
+  assert.match(res.body, /https:\/\/www\.obestlink\.com\/catalog\.html/);
+  assert.match(res.body, /https:\/\/www\.obestlink\.com\/product\/hp-s1000-plus-mouse/);
+  assert.match(res.body, /https:\/\/www\.obestlink\.com\/product\/infinix-xpower-20/);
+  assert.match(res.body, /https:\/\/www\.obestlink\.com\/product\/lucent-lcd-assembly-without-frame-compatible-for-tecno-camon-18i-lcd-screen-display/);
+  const xmlLocs = [...res.body.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => match[1]);
+  assert.ok(xmlLocs.includes("https://www.obestlink.com/request.html"));
+  assert.ok(xmlLocs.includes("https://www.obestlink.com/privacy.html"));
+  assert.ok(xmlLocs.every(url => url === "https://www.obestlink.com/" || !url.endsWith("/")), "sitemap URLs use their declared canonical forms");
+  assert.equal(xmlLocs.filter(url => url.startsWith("https://www.obestlink.com/product/lucent-")).length, 90, "all public Lucent routes should be discoverable except the held Note 3 Mini");
+  for (const url of STATIC_URLS) {
+    const pathname = new URL(url).pathname;
+    const file = pathname === "/" ? "index.html" : pathname.slice(1);
+    const html = fs.readFileSync(path.join(__dirname, "..", file), "utf8");
+    assert.match(html, new RegExp(`<link rel="canonical" href="${url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"\\s*/?>`), `${file} canonical must match its sitemap URL`);
+  }
+  assert.doesNotMatch(res.body, /note-3-mini|bad%20slug|bad slug/);
+  assert.equal([...res.body.matchAll(/<loc>/g)].length, new Set([...res.body.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => match[1])).size, "URLs should be unique");
+});
+
+test("dynamic sitemap fails closed without caching when Sanity is unavailable", async () => {
+  const handler = createSitemapHandler({ fetchImpl: async () => { throw new Error("offline"); } });
+  const res = mockResponse();
+  res.send = function (body) { this.body = body; return this; };
+  await handler({ method: "GET" }, res);
+  assert.equal(res.statusCode, 503);
+  assert.equal(res.headers["Cache-Control"], "no-store, max-age=0");
+  assert.doesNotMatch(res.body, /<urlset/);
+});
+
+test("dynamic sitemap rejects unsupported HTTP methods", async () => {
+  const handler = createSitemapHandler();
+  const res = mockResponse();
+  res.send = function (body) { this.body = body; return this; };
+  await handler({ method: "POST" }, res);
+  assert.equal(res.statusCode, 405);
+  assert.equal(res.headers.Allow, "GET");
+  assert.equal(res.headers["Cache-Control"], "no-store");
+});
+
 test("held Note 3 Mini research entry is not exposed as a direct product page", async () => {
   const held = lucentScreens.find(screen => /note-3-mini/i.test(screen.id));
   const handler = createProductPageHandler({ fetchImpl: async () => ({ ok: true, json: async () => ({ result: null }) }) });
@@ -425,7 +514,6 @@ test("published guides include the owner-approved charger checklist and safe loo
   const guides = fs.readFileSync(path.join(root, "guides.html"), "utf8");
   const article = fs.readFileSync(path.join(root, "charging-guide.html"), "utf8");
   const portArticle = fs.readFileSync(path.join(root, "charging-port-guide.html"), "utf8");
-  const sitemap = fs.readFileSync(path.join(root, "sitemap.xml"), "utf8");
 
   assert.match(guides, /02 GUIDES AVAILABLE/);
   assert.match(guides, /Why does my charging cable feel loose\?/);
@@ -444,7 +532,31 @@ test("published guides include the owner-approved charger checklist and safe loo
   assert.match(portArticle, /Turning the phone off does not make inserting a pin safe/);
   assert.match(portArticle, /Apple Support: Important handling information for iPhone/);
   assert.match(portArticle, /qualified technician/);
-  assert.match(sitemap, /https:\/\/www\.obestlink\.com\/charging-port-guide\.html/);
+});
+
+test("SEO routes expose the dynamic sitemap and robots advertise the sitemap endpoint", () => {
+  const root = path.resolve(__dirname, "..");
+  const vercel = JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
+  const robots = fs.readFileSync(path.join(root, "robots.txt"), "utf8");
+  const home = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const catalog = fs.readFileSync(path.join(root, "catalog.html"), "utf8");
+  const guides = fs.readFileSync(path.join(root, "guides.html"), "utf8");
+  const chargingGuide = fs.readFileSync(path.join(root, "charging-guide.html"), "utf8");
+  const portGuide = fs.readFileSync(path.join(root, "charging-port-guide.html"), "utf8");
+  const notFound = fs.readFileSync(path.join(root, "404.html"), "utf8");
+  assert.ok(vercel.rewrites.some(rule => rule.source === "/sitemap.xml" && rule.destination === "/api/sitemap"));
+  assert.equal(vercel.functions?.["api/sitemap.js"]?.includeFiles, "api/lucent-screen-research.json", "the Vercel function bundle must include approved public research routes");
+  assert.match(robots, /^Sitemap: https:\/\/www\.obestlink\.com\/sitemap\.xml$/m);
+  assert.match(home, /href="catalog\.html"/);
+  assert.match(home, /href="guides\.html"/);
+  assert.match(catalog, /href="charging-guide\.html"/);
+  assert.match(guides, /href="charging-guide\.html"/);
+  assert.match(guides, /href="charging-port-guide\.html"/);
+  assert.match(chargingGuide, /href="guides\.html"/);
+  assert.match(chargingGuide, /href="request\.html\?item=/);
+  assert.match(portGuide, /href="guides\.html"/);
+  assert.match(portGuide, /href="about\.html#engineer-service"/);
+  assert.match(notFound, /<meta name="robots" content="noindex, follow"\s*\/>/, "the not-found route should not be indexed");
 });
 
 test("shared script marks only the current navigation route for assistive technology", () => {

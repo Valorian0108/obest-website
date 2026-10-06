@@ -199,7 +199,7 @@ An AI coding assistant can inspect the repository and understand:
 # PHASE 3 — PRODUCT MANAGEMENT WORKFLOW
 
 ### Status
-`IN PROGRESS`
+`COMPLETE`
 
 ### Objective
 
@@ -232,7 +232,8 @@ Sanity Studio
 - Increased the Studio slug input limit to 128 characters to match the public route and added a uniqueness check against published and draft Sanity products.
 - Added regression tests for the Studio preview and slug safeguards. `npm run check` and all 56 tests pass.
 - The Studio schema deployed successfully to `https://obest-catalogue.sanity.studio/`; the owner confirmed existing slugs are accepted unchanged and duplicate slugs are flagged. No product documents were changed or published for this verification.
-- Remaining: owner-facing review of create/edit/publish workflow, image handling, unpublished-product exclusion, and change propagation. The local Studio build succeeded. Do not publish test content.
+- The owner confirms the create/edit/publish workflow, image handling, unpublished-product exclusion, and published-change propagation all pass in the hosted Studio/site workflow. No product changes were made by the assistant during verification.
+- The local Studio build succeeded. Automated syntax checks and all 56 tests pass.
 
 ### Definition of done
 
@@ -243,7 +244,7 @@ Adding a normal product requires no code changes.
 # PHASE 4 — HUMANIZE THE UI
 
 ### Status
-`AFTER PHASE 3`
+`COMPLETE`
 
 ### Objective
 
@@ -279,12 +280,16 @@ Consider:
 
 The website should feel like a distinctive brand rather than a generic modern template.
 
+### Completion note
+
+The existing visual system was refined across the homepage, catalogue, product detail, request, guides, and About & visit pages using the site's real photography, illustrations, shop details, and approved content. The final responsive sweep covered seven main pages at 320, 375, 414, 768, 1024, and 1440 CSS pixels. It found no document-level horizontal overflow, missing page headings, hidden request sections, or clipped primary controls. The request page's introduction and form now remain visible without waiting for a scroll-reveal observer, and its layout stacks at tablet widths rather than compressing into narrow columns. `npm run check`, all 56 tests, and `git diff --check` pass. Changes remain local and have not been deployed.
+
 ---
 
 # PHASE 5 — SEO AND ORGANIC DISCOVERY
 
 ### Status
-`AFTER PHASE 4`
+`IN PROGRESS`
 
 ### Objective
 
@@ -301,9 +306,21 @@ Increase the number of useful pages search engines can discover.
 7. Build useful evergreen guides around real customer questions.
 8. Verify indexing readiness.
 
+### Phase 5 progress
+
+- Existing static content pages retain their page-specific canonical URLs and social metadata. Added canonical URLs for the request and privacy pages so each stable public route identifies itself.
+- Replaced the fixed sitemap file with `/sitemap.xml` backed by a cached, read-only Vercel function. It lists stable public content pages, fully normalized published Sanity products, and public Lucent research product routes; the held Note 3 Mini remains excluded. Sanity errors fail closed with a non-cacheable 503 rather than publishing an incomplete sitemap.
+- Added product-specific Product JSON-LD to server-rendered product pages. It uses only actual product fields and omits offers, prices, ratings, and availability claims.
+- Automated tests cover dynamic sitemap contents, draft exclusion, invalid product IDs, the held-model exclusion, failure caching behavior, sitemap routing, canonicals, internal guide links, and product structured data. The live Sanity query returned 265 published products, all valid and unique.
+- A Vercel Preview was built and inspected using the authenticated Vercel CLI: `/sitemap.xml` returned valid XML with 273 URLs (8 stable pages, 265 published products), request/privacy canonicals match their social URLs, shop and Lucent sample products return matching canonical and valid JSON-LD metadata, and the held Samsung Galaxy Note 3 Mini has no product metadata and is absent from the sitemap. The Preview is not Production.
+
 ### Definition of done
 
 New published products can become discoverable through the site's sitemap and internal links without manually editing sitemap files.
+
+### Remaining verification before completion
+
+- Review the resulting Preview with Google Search Console or the available indexing tools, and address any real indexing blockers. Do not submit sitemap changes to Production or deploy without owner approval.
 
 ---
 
@@ -410,27 +427,9 @@ A phase is complete when:
 
 # 7. CURRENT PRIORITY
 
-The immediate priority is:
+## PHASE 5 — SEO AND ORGANIC DISCOVERY
 
-## PHASE 2 — MAKE THE PROJECT AI-MAINTAINABLE
-
-### Phase 1 completion (4 October 2026)
-
-- Sanity is the only runtime shop-product source across homepage, catalogue, and product pages; `products.js` is retained only for migration verification and tests.
-- Empty/unavailable catalogue states, long slugs, and the held Note 3 Mini exclusions are implemented and covered by automated tests.
-- All 265 published Sanity products passed normalization with unique IDs; the longest slug is 114 characters.
-- Owner reports the review-branch Preview checks passed for the catalogue and product experience. Production remains untouched.
-
-### Phase 2 progress
-
-- Added `OBEST-ARCHITECTURE.md` describing system boundaries, data flows, operational ownership, local checks, and deployment safety rules.
-- Added `npm run check` and GitHub Actions CI for Node 20 syntax checks and the existing automated suite on pull requests and review-branch pushes.
-- GitHub Actions passed for commit `45f68b0` on `mobile-parity-review`; the owner confirmed its CI and Preview checks passed.
-- Reviewed `app.js` (483 lines). Keep it as one page-aware script for now: the catalogue and product-detail views share rendering helpers, and splitting them would add boundaries without a demonstrated safety benefit. Removed one obsolete catalogue-batch comment that no longer described the Sanity-authoritative runtime.
-- Reviewed `OBEST-ARCHITECTURE.md`, `README.md`, and `BUILD-ROADMAP.md` against the actual routes, scripts, and protection constraints. The engineering roadmap remains the AI change-control source; the older build roadmap tracks separate business/launch phases.
-- Phase 2 complete: project structure, data/API locations, secrets boundaries, deployment constraints, checks, ownership, and AI change-control rules are documented; the repeatable local checks and CI are passing. No framework or hosting changes were made.
-
-Phase 3 may begin next: review and improve the Sanity product-entry workflow without broadening the public catalogue beyond owner-approved intent. Do not begin the UI redesign, SEO expansion, or advertising work ahead of their roadmap phases.
+Phases 1 through 4 are complete. Phase 5 is in progress. The current work adds sitemap discovery for published products and verifies product-level search metadata while preserving the Sanity/Vercel architecture and the owner-approved product exposure policy. Do not start advertising and monetization work (Phase 6) until Phase 5 is complete.
 
 ---
 

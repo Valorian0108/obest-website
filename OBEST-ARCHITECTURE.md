@@ -21,6 +21,7 @@ The product editor requires the core listing fields, generates a URL ID from the
 
 - **Shop catalogue:** page loads `catalog-data.js` → same-origin `GET /api/catalogue` → published Sanity products are normalized → browser renders categories and products. Empty results remain empty. API failure displays an unavailable state; there is no `products.js` fallback.
 - **Product page:** `/product/:id` rewrites to `api/product.js` for product-specific HTML metadata; browser code then loads the shared catalogue feed for interactive details. Only published Sanity products and explicitly public research records resolve.
+- **Search discovery:** `/sitemap.xml` rewrites to `api/sitemap.js`, which combines stable public content URLs with normalized published Sanity products and public Lucent research routes. The held Note 3 Mini remains excluded. Product HTML includes escaped, factual Product JSON-LD without prices, ratings, or stock claims.
 - **Inquiry:** browser submits JSON to `POST /api/request` → server validates method, content type, size, fields, honeypot, and configuration → Resend is called only when configured and enabled → success is returned only after provider acceptance. Vercel Firewall rate limiting is an additional control, not replaced by application validation.
 - **Sanity Studio:** editors publish product documents to the existing project/dataset. The public website reads published content without a client-side token; edits do not need a site redeploy.
 
