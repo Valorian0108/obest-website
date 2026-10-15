@@ -10,12 +10,12 @@ const CATEGORY_NAMES = Object.freeze({
   parts: "Phone parts",
 });
 const ITEM_TYPES = new Set([
-  "power-banks", "chargers", "cables", "earbuds", "headphones", "mice",
-  "smartwatches", "fans", "cookers", "vacuum-cleaners", "phone-screens", "power-flex",
+  "power-banks", "chargers", "cables", "earbuds", "headphones", "speakers", "mice",
+  "smartwatches", "fans", "cookers", "vacuum-cleaners", "solar-lights", "phone-screens", "power-flex",
 ]);
 const ICONS = new Set([
   "bank", "cable", "charger", "cooker", "earbuds", "fan", "flex",
-  "headphones", "mouse", "screenpart", "vacuum", "watch", "case",
+  "headphones", "mouse", "screenpart", "solarlight", "speaker", "vacuum", "watch", "case",
 ]);
 const QUERY = `*[_type == "product" && defined(slug.current) && !(_id in path("drafts.**"))] | order(category asc, name asc)[0...300] {
   "id": slug.current,

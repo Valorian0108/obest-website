@@ -15,21 +15,23 @@ const itemTypes = [
   { title: "Cables", value: "cables" },
   { title: "Earbuds", value: "earbuds" },
   { title: "Headphones", value: "headphones" },
+  { title: "Speakers", value: "speakers" },
   { title: "Mice", value: "mice" },
   { title: "Smartwatches", value: "smartwatches" },
   { title: "Fans", value: "fans" },
   { title: "Cookers", value: "cookers" },
   { title: "Vacuum cleaners", value: "vacuum-cleaners" },
+  { title: "Solar lights", value: "solar-lights" },
   { title: "Phone screens", value: "phone-screens" },
   { title: "Power/volume flexes", value: "power-flex" },
 ];
 
 const itemTypesByCategory = {
   power: ["power-banks", "chargers", "cables"],
-  audio: ["earbuds", "headphones"],
+  audio: ["earbuds", "headphones", "speakers"],
   computing: ["mice"],
   wearables: ["smartwatches"],
-  home: ["fans", "cookers", "vacuum-cleaners"],
+  home: ["fans", "cookers", "vacuum-cleaners", "solar-lights"],
   parts: ["phone-screens", "power-flex"],
 };
 
@@ -41,7 +43,7 @@ const availabilityOptions = [
 
 const iconOptions = [
   "bank", "cable", "charger", "cooker", "earbuds", "fan", "flex",
-  "headphones", "mouse", "screenpart", "vacuum", "watch",
+  "headphones", "mouse", "screenpart", "solarlight", "speaker", "vacuum", "watch",
 ].map((value) => ({ title: value.replaceAll("-", " "), value }));
 
 const lineRequired = (Rule) => Rule.required().min(1).max(160);
@@ -118,7 +120,7 @@ export const product = defineType({
       name: "itemType",
       title: "Product type",
       type: "string",
-      description: "Choose a type that belongs to the selected category: Power & charging (power banks, chargers, cables); Audio (earbuds, headphones); Computing (mice); Wearables (smartwatches); Home & appliances (fans, cookers, vacuum cleaners); Phone parts (phone screens, power/volume flexes).",
+      description: "Choose a type that belongs to the selected category: Power & charging (power banks, chargers, cables); Audio (earbuds, headphones, speakers); Computing (mice); Wearables (smartwatches); Home & appliances (fans, cookers, vacuum cleaners, solar lights); Phone parts (phone screens, power/volume flexes).",
       options: { list: itemTypes, layout: "dropdown" },
       validation: (Rule) => Rule.required().custom((value, context) => {
         const category = context.parent?.category;

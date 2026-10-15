@@ -35,15 +35,15 @@ const client = getCliClient({ apiVersion: "2025-01-01", useCdn: false });
 const validCategories = new Set(["power", "audio", "computing", "wearables", "home", "parts"]);
 const itemTypesByCategory: Record<string, Set<string>> = {
   power: new Set(["power-banks", "chargers", "cables"]),
-  audio: new Set(["earbuds", "headphones"]),
+  audio: new Set(["earbuds", "headphones", "speakers"]),
   computing: new Set(["mice"]),
   wearables: new Set(["smartwatches"]),
-  home: new Set(["fans", "cookers", "vacuum-cleaners"]),
+  home: new Set(["fans", "cookers", "vacuum-cleaners", "solar-lights"]),
   parts: new Set(["phone-screens", "power-flex"]),
 };
 const validIcons = new Set([
   "case", "bank", "cable", "charger", "cooker", "earbuds", "fan", "flex",
-  "headphones", "mouse", "screenpart", "vacuum", "watch",
+  "headphones", "mouse", "screenpart", "solarlight", "speaker", "vacuum", "watch",
 ]);
 if (client.config().projectId !== "ese1smjb" || client.config().dataset !== "production") {
   throw new Error("Refusing to migrate: CLI project/dataset do not match O-BEST production configuration.");

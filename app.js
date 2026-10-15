@@ -1,6 +1,6 @@
 (() => {
   const categoryNames = { power: "Power & charging", audio: "Audio", parts: "Phone parts", computing: "Computing", wearables: "Wearables", home: "Home & appliances" };
-  const itemTypeNames = { "power-banks": "Power banks", chargers: "Chargers", cables: "Cables", earbuds: "Earbuds", headphones: "Headphones", mice: "Mice", smartwatches: "Smartwatches", fans: "Fans", cookers: "Cookers", "vacuum-cleaners": "Vacuum cleaners", "phone-screens": "Phone screens", "power-flex": "Power/volume flexes" };
+  const itemTypeNames = { "power-banks": "Power banks", chargers: "Chargers", cables: "Cables", earbuds: "Earbuds", headphones: "Headphones", speakers: "Speakers", mice: "Mice", smartwatches: "Smartwatches", fans: "Fans", cookers: "Cookers", "vacuum-cleaners": "Vacuum cleaners", "solar-lights": "Solar lights", "phone-screens": "Phone screens", "power-flex": "Power/volume flexes" };
   // Availability defaults are shop-approved display states; individual records can override the default.
   const availabilityByItemType = Object.freeze({ "phone-screens": "available" });
   const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({
@@ -42,6 +42,7 @@
       earpiece: '<path d="M22 21a11 11 0 0 1 22 0v7q0 8-11 11l-4 1v8M31 48h8"/><circle cx="33" cy="22" r="3"/>',
       neckband: '<path d="M17 14v16q0 22 17 22t17-22V14M17 15l-5 9 7 5M51 15l5 9-7 5"/><rect x="12" y="21" width="9" height="9" rx="4"/><rect x="47" y="21" width="9" height="9" rx="4"/>',
       speaker: '<rect x="15" y="10" width="38" height="45" rx="8"/><circle cx="34" cy="34" r="12"/><circle cx="34" cy="34" r="5"/><circle cx="34" cy="19" r="2"/>',
+      solarlight: '<circle cx="34" cy="19" r="8"/><path d="M34 5v4M34 29v2M20 19h4M44 19h4M24 9l3 3M41 26l3 3M44 9l-3 3M27 26l-3 3"/><path d="M17 55h34l-6-17H23z"/><path d="M28 38l-2 17M40 38l2 17M19 46h30"/>',
       case: '<rect x="19" y="7" width="30" height="50" rx="7"/><path d="M38 13h6v7h-6zM28 50h12"/>',
       screen: '<rect x="16" y="8" width="36" height="48" rx="5"/><path d="m25 27 7 7 13-14M28 48h12"/>',
       screenpart: '<rect x="18" y="7" width="32" height="49" rx="4"/><path d="m23 13 5 4-4 5 7 5-5 5 8 6-6 6 8 7"/>',
@@ -187,13 +188,13 @@
     let detachCatalogListeners = () => {};
     const catalogCategories = [
       { id: "power", name: "Power & charging", description: "Power banks, chargers and cables", icon: "charger", types: ["power-banks", "chargers", "cables"] },
-      { id: "audio", name: "Audio & listening", description: "Earbuds and headphones", icon: "headphones", types: ["earbuds", "headphones"] },
+      { id: "audio", name: "Audio & listening", description: "Earbuds, headphones and speakers", icon: "headphones", types: ["earbuds", "headphones", "speakers"] },
       { id: "computing", name: "Computing", description: "Mice and everyday computer accessories", icon: "mouse", types: ["mice"] },
       { id: "wearables", name: "Wearables", description: "Smartwatches and wearable tech", icon: "watch", types: ["smartwatches"] },
-      { id: "home", name: "Home & appliances", description: "Fans and practical home appliances", icon: "fan", types: ["fans", "cookers", "vacuum-cleaners"] },
+      { id: "home", name: "Home & appliances", description: "Fans, solar lights and practical home appliances", icon: "fan", types: ["fans", "cookers", "vacuum-cleaners", "solar-lights"] },
       { id: "parts", name: "Phone parts", description: "Screens and phone repair parts", icon: "screenpart", types: ["phone-screens", "power-flex"] }
     ];
-    const typeIcons = { "power-banks": "bank", chargers: "charger", cables: "cable", earbuds: "earbuds", headphones: "headphones", mice: "mouse", smartwatches: "watch", fans: "fan", cookers: "cooker", "vacuum-cleaners": "vacuum", "phone-screens": "screenpart", "power-flex": "flex" };
+    const typeIcons = { "power-banks": "bank", chargers: "charger", cables: "cable", earbuds: "earbuds", headphones: "headphones", speakers: "speaker", mice: "mouse", smartwatches: "watch", fans: "fan", cookers: "cooker", "vacuum-cleaners": "vacuum", "solar-lights": "solarlight", "phone-screens": "screenpart", "power-flex": "flex" };
     const startCatalog = catalogueProducts => {
     detachCatalogListeners();
     const products = (catalogueProducts || []).filter(product => product && typeof product.id === "string" && typeof product.name === "string");

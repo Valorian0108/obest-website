@@ -340,7 +340,9 @@ test("home and catalogue only link to categories and product types with listings
 
   const catalogBlock = app.slice(app.indexOf("const catalogCategories = ["), app.indexOf("const typeIcons ="));
   const configuredTypes = [...catalogBlock.matchAll(/types: \[([^\]]+)\]/g)].flatMap(match => [...match[1].matchAll(/"([a-z-]+)"/g)].map(type => type[1]));
-  assert.ok(configuredTypes.every(type => listedProducts.some(product => product.itemType === type)), "empty item types should not appear in the catalogue taxonomy");
+  // Owner-approved October 2026 additions: speakers and solar lights are listed from Sanity, not from the legacy 130-record fixture.
+  const ownerApprovedNewTypes = new Set(["speakers", "solar-lights"]);
+  assert.ok(configuredTypes.every(type => ownerApprovedNewTypes.has(type) || listedProducts.some(product => product.itemType === type)), "empty item types should not appear in the catalogue taxonomy");
 });
 
 test("product cards use clean URLs while the detail page keeps legacy links working", () => {
